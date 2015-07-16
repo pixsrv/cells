@@ -72,7 +72,6 @@ nsGene.World.prototype.go = function () {
     nsGene.world.ctx.clearRect(0, 0, config.canvasSizeX, config.canvasSizeY);
 
     // redraw entities
-    nsGene.world.frame();
     nsGene.world.redraw();
 
     // request new frame
@@ -141,14 +140,3 @@ nsGene.World.prototype.redraw = function () {
         e.entity.links.splice(0, e.entity.links.length);
     }
 };
-
-nsGene.World.prototype.frame = function () {
-
-    nsGene.world.ctx.beginPath();
-    nsGene.world.ctx.rect(0, 0, nsGene.config.canvasSizeX, nsGene.config.canvasSizeY);
-    nsGene.world.ctx.lineWidth = .5;
-    nsGene.world.ctx.strokeStyle = "black";
-    nsGene.world.ctx.stroke();
-
-};
-
