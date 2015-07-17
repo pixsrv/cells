@@ -68,7 +68,6 @@ nsGene.Entity.prototype.draw = function (e) {
     var ctx = nsGene.world.ctx;
 
     var genes = e.entity.genes;
-    //var bodyColor = nsGene.rgb2hex(genes.bodycolor.value[0], genes.bodycolor.value[1], genes.bodycolor.value[2]);
     var bodyColor = nsGene.colorGene2hex2(genes.bodycolor);
     var membraneColor = nsGene.rgb2hex(genes.membranecolor.value[0], genes.membranecolor.value[1], genes.membranecolor.value[2]);
 
@@ -96,7 +95,11 @@ nsGene.Entity.prototype.draw = function (e) {
     }
     ctx.closePath();
 
-    ctx.fillStyle = bodyColor;
+    if(e.velocity > 0.001)
+        ctx.fillStyle = "rgba(255, 200, 200, .7)";
+    else
+        ctx.fillStyle = bodyColor;
+
     ctx.fill();
     ctx.lineWidth = genes.membraneThickness.value;
     ctx.strokeStyle = membraneColor;
