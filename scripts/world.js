@@ -8,10 +8,10 @@ nsGene.config = {
     isRunning: true,
 
     entityMoveStep: 1,
-    canvasSizeX   : 500,
-    canvasSizeY   : 500,
+    canvasSizeX   : 800,
+    canvasSizeY   : 800,
 
-    entityInitialCount: 70,
+    entityInitialCount: 170,
     entityMinCount    : 0,
     entityMaxCount    : 2500,
 
