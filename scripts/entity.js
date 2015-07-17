@@ -15,13 +15,29 @@ nsGene.Gene2 = function Gene2(/*geneAsObject*/) {
 nsGene.Entity = function Entity() {
 
     this.genes = {
-        "bodysize": new nsGene.Gene2({
+        "bodysize" : new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 30,
+            "value"        : 15 + nsGene.randomRange(-10, 15),
             "min"          : 3,
             "max"          : "undefined"
+        }),
+        "bodycolor": new nsGene.Gene2({
+            "isInheritable": true,
+            "isEvolvable"  : true,
+            "isMutable"    : true,
+            "value"        : [200, 255, 200],
+            "min"          : [0, 0, 0],
+            "max"          : [255, 255, 255]
+        }),
+        "membranecolor": new nsGene.Gene2({
+            "isInheritable": true,
+            "isEvolvable"  : true,
+            "isMutable"    : true,
+            "value"        : [50, 100, 50],
+            "min"          : [0, 0, 0],
+            "max"          : [255, 255, 255]
         })
     };
 
@@ -50,8 +66,8 @@ nsGene.Entity.prototype.draw = function (x, y) {
 
 nsGene.Entity.prototype.draw2 = function (e) {
     var ctx = nsGene.world.ctx;
-    var fillColor = "white";
-    var lineColor = "darkgreen";
+    var fillColor = "rgba(" + e.entity.genes.bodycolor.value[0] + "," + e.entity.genes.bodycolor.value[1] + "," + e.entity.genes.bodycolor.value[2] + ",1.0)";
+    var lineColor = "rgba(" + e.entity.genes.membranecolor.value[0] + "," + e.entity.genes.membranecolor.value[1] + "," + e.entity.genes.membranecolor.value[2] + ",1.0)";
 
     //denser bezier
     /*
@@ -88,11 +104,13 @@ nsGene.Entity.prototype.draw2 = function (e) {
     ctx.stroke();
 
     // direction and velocity
+/*
     var vec = nsGene.transformRotate(x, y, e.velocity, 0, e.angle);
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(vec.x, vec.y);
     ctx.lineWidth = 1;
     ctx.strokeStyle = "red";
+*/
     ctx.stroke();
 };

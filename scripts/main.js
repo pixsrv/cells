@@ -14,7 +14,7 @@ nsGene.init = (function () {
             x       : Math.floor((nsGene.random() * nsGene.config.canvasSizeX)),
             y       : Math.floor((nsGene.random() * nsGene.config.canvasSizeY)),
             angle   : Math.floor((nsGene.random() * 360)),
-            velocity: Math.floor((nsGene.random() * 20))
+            velocity: Math.floor((nsGene.random() * 5))
         };
     }
 

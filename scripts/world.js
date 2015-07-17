@@ -11,7 +11,7 @@ nsGene.config = {
     canvasSizeX   : 500,
     canvasSizeY   : 500,
 
-    entityInitialCount: 65,
+    entityInitialCount: 180,
     entityMinCount    : 0,
     entityMaxCount    : 2500,
 
@@ -50,13 +50,13 @@ nsGene.World.prototype.go = function () {
             var mD = entityA.entity.genes.bodysize.value + entityB.entity.genes.bodysize.value;
 
             if (interaction.distance < mD) {
-                entityA.angle = nsGene.toDegrees(interaction.angle) + nsGene.randomRange(-30, 30);
-                entityB.angle = nsGene.toDegrees(interaction.angle) - 180 + nsGene.randomRange(-30, 30);
+                entityA.angle = nsGene.toDegrees(interaction.angle) + nsGene.randomRange(-15, 15);
+                entityB.angle = nsGene.toDegrees(interaction.angle) - 180 + nsGene.randomRange(-15, 15);
 
-                entityA.velocity = interaction.distance/10;
-                entityB.velocity = interaction.distance/10;
+                entityA.velocity = entityA.entity.genes.bodysize.value * (5 /interaction.distance);
+                entityB.velocity = entityB.entity.genes.bodysize.value*(5/interaction.distance);
             }
-            if(interaction.distance == 0){
+            if (interaction.distance < mD/5) {
                 entityA.velocity = Math.floor((nsGene.random() * 10));
                 entityB.velocity = Math.floor((nsGene.random() * 10));
             }

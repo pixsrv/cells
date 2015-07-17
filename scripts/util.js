@@ -83,8 +83,6 @@ nsGene.calcInteraction = function (eA, eB) {
             break;
     }
 
-    //var angle = -Math.asin(sin);
-
     return {
         distance: distance,
         angle   : angle
