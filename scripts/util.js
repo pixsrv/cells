@@ -48,10 +48,10 @@ nsGene.quarter = function (x1, y1, x2, y2) {
     }
 };
 
-nsGene.transformRotate = function (cx, cy, x, y, angle) {
-    var radians = nsGene.toRadians(angle),
-        cos = Math.cos(radians),
-        sin = Math.sin(radians),
+nsGene.transformRotate = function (cx, cy, x, y, angleDeg) {
+    var angleRad = nsGene.toRadians(angleDeg),
+        cos = Math.cos(angleRad),
+        sin = Math.sin(angleRad),
         xt = (cos * (x)) - (sin * (y)) + cx,
         yt = (cos * (y)) + (sin * (x)) + cy;
     return {x: xt, y: yt};
@@ -64,49 +64,51 @@ nsGene.transformTranslate = function (cx, cy, dx, dy) {
 nsGene.calcInteraction = function (eA, eB) {
     var distance = parseInt(Math.sqrt((eA.x - eB.x) * (eA.x - eB.x) + (eA.y - eB.y) * (eA.y - eB.y)));
     var dy = eB.y - eA.y;
-    var angle;
+    var angleRad;
     var sin = dy / (distance == 0 ? 1 : distance);
     sin = sin < -1 ? -1 : sin > 1 ? 1 : sin;
 
     switch (nsGene.quarter(eA.x, eA.y, eB.x, eB.y)) {
         case 1:
-            angle = Math.asin(sin) - (Math.PI);
+            angleRad = Math.asin(sin) - (Math.PI);
             break;
         case 2:
-            angle = -Math.asin(sin);
+            angleRad = -Math.asin(sin);
             break;
         case 3:
-            angle = -Math.asin(sin);
+            angleRad = -Math.asin(sin);
             break;
         case 4:
-            angle = Math.asin(sin) - (Math.PI);
+            angleRad = Math.asin(sin) - (Math.PI);
             break;
     }
 
     return {
         distance: distance,
-        angle   : angle
+        angle   : angleRad
     }
 };
 
-nsGene.calcIntersection = function (r1, r2, dist) {
-    var d1 = (-r1 * r1 + dist * dist + r2 * r2) / (2 * dist);
-    var d2 = dist - d1;
-    var a = Math.sqrt(r1 * r1 - d1 * d1);
-    var alpha1 = Math.asin(a / r1);
-    var alpha2 = Math.asin(a / r2);
+//nsGene.calcIntersection = function (r1, r2, dist) {
+//    var d1 = (-r1 * r1 + dist * dist + r2 * r2) / (2 * dist);
+//    var d2 = dist - d1;
+//    var a = Math.sqrt(r1 * r1 - d1 * d1);
+//    var alpha1 = Math.asin(a / r1);
+//    var alpha2 = Math.asin(a / r2);
+//
+//    return {
+//        d1    : d1,
+//        d2    : d2,
+//        a     : a,
+//        alpha1: alpha1,
+//        alpha2: alpha2
+//    }
+//};
 
-    return {
-        d1    : d1,
-        d2    : d2,
-        a     : a,
-        alpha1: alpha1,
-        alpha2: alpha2
-    }
+nsGene.toDegrees = function (angleRad) {
+    return angleRad * (180 / Math.PI);
 };
-nsGene.toDegrees = function (angle) {
-    return angle * (180 / Math.PI);
-};
-nsGene.toRadians = function (angle) {
-    return angle * (Math.PI / 180);
+
+nsGene.toRadians = function (angleDeg) {
+    return angleDeg * (Math.PI / 180);
 };

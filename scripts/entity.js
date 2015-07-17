@@ -15,15 +15,15 @@ nsGene.Gene2 = function Gene2(/*geneAsObject*/) {
 nsGene.Entity = function Entity() {
 
     this.genes = {
-        "bodysize" : new nsGene.Gene2({
+        "bodysize"         : new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 15 + nsGene.randomRange(-10, 15),
+            "value"        : 15 + nsGene.randomRange(-10, 32),
             "min"          : 3,
-            "max"          : "undefined"
+            "max"          : undefined
         }),
-        "bodycolor": new nsGene.Gene2({
+        "bodycolor"        : new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
@@ -31,86 +31,84 @@ nsGene.Entity = function Entity() {
             "min"          : [0, 0, 0],
             "max"          : [255, 255, 255]
         }),
-        "membranecolor": new nsGene.Gene2({
+        "membrane"         : new nsGene.Gene2({
+            "isInheritable": true,
+            "isEvolvable"  : true,
+            "isMutable"    : true,
+            /** membrane construction
+             * [radiusMultiplier1, angle1, radiusMultiplier2, angle2, ..., radiusMultiplierN, angleN]
+             */
+            "value"        : [
+                [1, 0], [1, 15], [1, 30], [1, 45], [1, 60], [1, 75], [1, 90], [1, 105], [1, 120], [1, 135], [1, 150], [1, 165], [1, 180],
+                [1, 195], [1, 210], [1, 225], [1, 240], [1, 255], [1, 270], [1, 285], [1, 300], [1, 315], [1, 330], [1, 345]
+            ],
+            "min"          : undefined,
+            "max"          : undefined
+        }),
+        "membranecolor"    : new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
             "value"        : [50, 100, 50],
             "min"          : [0, 0, 0],
             "max"          : [255, 255, 255]
+        }),
+        "membraneThickness": new nsGene.Gene2({
+            "isInheritable": true,
+            "isEvolvable"  : true,
+            "isMutable"    : true,
+            "value"        : 1,
+            "min"          : 1,
+            "max"          : 5
         })
     };
-
-    this.links = [];
 };
 
-nsGene.Entity.prototype.draw = function (x, y) {
+nsGene.Entity.prototype.draw = function (e) {
     var ctx = nsGene.world.ctx;
-    var fillColor = "white";
-    var lineColor = "darkgreen";
 
-    // nucleus (circle)
-    nsGene.world.ctx.beginPath();
-    nsGene.world.ctx.arc(x, y, this.genes.bodysize.value, 0, 2 * Math.PI);
-    nsGene.world.ctx.fillStyle = fillColor;
-    nsGene.world.ctx.fill();
-    nsGene.world.ctx.closePath();
-    nsGene.world.ctx.stroke();
-
-    ctx.fillStyle = fillColor;
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = lineColor;
-    ctx.stroke();
-};
-
-nsGene.Entity.prototype.draw2 = function (e) {
-    var ctx = nsGene.world.ctx;
-    var fillColor = "rgba(" + e.entity.genes.bodycolor.value[0] + "," + e.entity.genes.bodycolor.value[1] + "," + e.entity.genes.bodycolor.value[2] + ",1.0)";
-    var lineColor = "rgba(" + e.entity.genes.membranecolor.value[0] + "," + e.entity.genes.membranecolor.value[1] + "," + e.entity.genes.membranecolor.value[2] + ",1.0)";
-
-    //denser bezier
-    /*
-     var a = .278;
-     var b = .530;
-     var c = .712;
-     var d = .886;
-
-     var p = [
-     {x: -1, y: -a},
-     {x: -d, y: -b},
-     {x: -c, y: -c},
-     {x: -b, y: -d},
-     {x: -a, y: -1}
-     ];
-     */
+    var genes = e.entity.genes;
+    var bodyColor = nsGene.rgb2hex(genes.bodycolor.value[0], genes.bodycolor.value[1], genes.bodycolor.value[2]);
+    var membraneColor = nsGene.rgb2hex(genes.membranecolor.value[0], genes.membranecolor.value[1], genes.membranecolor.value[2]);
 
     var x = e.x;
     var y = e.y;
-    var bs = this.genes.bodysize.value;
+    var r = genes.bodysize.value;
+    var membrane = e.entity.genes.membrane.value;
 
-    // nucleus bezier
+    var point;
+    var newPoint;
+
+    // nucleus polyline
     ctx.beginPath();
-    ctx.moveTo(x - bs, y);
-    ctx.bezierCurveTo(x - bs, y - (bs * 0.548), x - (bs * 0.548), y - bs, x, y - bs);
-    ctx.bezierCurveTo(x + (bs * 0.548), y - (bs), x + bs, y - (bs * 0.548), x + bs, y);
-    ctx.bezierCurveTo(x + (bs), y + (bs * 0.548), x + (bs * 0.548), y + bs, x, y + bs);
-    ctx.bezierCurveTo(x - (bs * 0.548), y + (bs), x - (bs), y + (bs * 0.548), x - (bs), y);
+    for (var i = 0; i < membrane.length; i++) {
+        point = membrane[i];
 
-    ctx.fillStyle = fillColor;
+        newPoint = nsGene.transformRotate(e.x, e.y, r * point[0], 0, point[1]);
+
+        if (i == 0) {
+            ctx.moveTo(newPoint.x, newPoint.y);
+            continue;
+        }
+
+        ctx.lineTo(newPoint.x, newPoint.y);
+    }
+    ctx.closePath();
+
+    ctx.fillStyle = bodyColor;
     ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = genes.membraneThickness.value;
+    ctx.strokeStyle = membraneColor;
     ctx.stroke();
 
     // direction and velocity
-/*
-    var vec = nsGene.transformRotate(x, y, e.velocity, 0, e.angle);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(vec.x, vec.y);
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "red";
-*/
-    ctx.stroke();
+    if (nsGene.config.drawForces) {
+        newPoint = nsGene.transformRotate(x, y, e.velocity, 0, e.angle);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(newPoint.x, newPoint.y);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "red";
+        ctx.stroke();
+    }
 };
