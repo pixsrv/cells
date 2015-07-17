@@ -37,6 +37,9 @@ nsGene.rgba2hex = function (r, g, b, a) {
 nsGene.colorGene2hex = function (gene) {
     return nsGene.rgb2hex(gene.value[0], gene.value[1], gene.value[2]);
 };
+nsGene.colorGene2hex2 = function (gene) {
+    return "rgba(" + gene.value[0] + "," + gene.value[1] + "," + gene.value[2] + "," + ".7" + ")";
+};
 
 nsGene.quarter = function (x1, y1, x2, y2) {
     if (x1 < x2) {

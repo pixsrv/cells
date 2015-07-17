@@ -57,7 +57,7 @@ nsGene.Entity = function Entity() {
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 1,
+            "value"        : 2,
             "min"          : 1,
             "max"          : 5
         })
@@ -68,7 +68,8 @@ nsGene.Entity.prototype.draw = function (e) {
     var ctx = nsGene.world.ctx;
 
     var genes = e.entity.genes;
-    var bodyColor = nsGene.rgb2hex(genes.bodycolor.value[0], genes.bodycolor.value[1], genes.bodycolor.value[2]);
+    //var bodyColor = nsGene.rgb2hex(genes.bodycolor.value[0], genes.bodycolor.value[1], genes.bodycolor.value[2]);
+    var bodyColor = nsGene.colorGene2hex2(genes.bodycolor);
     var membraneColor = nsGene.rgb2hex(genes.membranecolor.value[0], genes.membranecolor.value[1], genes.membranecolor.value[2]);
 
     var x = e.x;
