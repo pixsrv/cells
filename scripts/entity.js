@@ -29,16 +29,70 @@ nsGene.Entity = function Entity() {
 };
 
 nsGene.Entity.prototype.draw = function (x, y) {
+    var ctx = nsGene.world.ctx;
     var fillColor = "white";
     var lineColor = "darkgreen";
 
-    // nucleus
+    // nucleus (circle)
     nsGene.world.ctx.beginPath();
     nsGene.world.ctx.arc(x, y, this.genes.bodysize.value, 0, 2 * Math.PI);
     nsGene.world.ctx.fillStyle = fillColor;
     nsGene.world.ctx.fill();
-    //nsGene.world.ctx.lineWidth = 2;
-    //nsGene.world.ctx.strokeStyle = lineColor;
     nsGene.world.ctx.closePath();
     nsGene.world.ctx.stroke();
+
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = lineColor;
+    ctx.stroke();
+};
+
+nsGene.Entity.prototype.draw2 = function (e) {
+    var ctx = nsGene.world.ctx;
+    var fillColor = "white";
+    var lineColor = "darkgreen";
+
+    //denser bezier
+    /*
+     var a = .278;
+     var b = .530;
+     var c = .712;
+     var d = .886;
+
+     var p = [
+     {x: -1, y: -a},
+     {x: -d, y: -b},
+     {x: -c, y: -c},
+     {x: -b, y: -d},
+     {x: -a, y: -1}
+     ];
+     */
+
+    var x = e.x;
+    var y = e.y;
+    var bs = this.genes.bodysize.value;
+
+    // nucleus bezier
+    ctx.beginPath();
+    ctx.moveTo(x - bs, y);
+    ctx.bezierCurveTo(x - bs, y - (bs * 0.548), x - (bs * 0.548), y - bs, x, y - bs);
+    ctx.bezierCurveTo(x + (bs * 0.548), y - (bs), x + bs, y - (bs * 0.548), x + bs, y);
+    ctx.bezierCurveTo(x + (bs), y + (bs * 0.548), x + (bs * 0.548), y + bs, x, y + bs);
+    ctx.bezierCurveTo(x - (bs * 0.548), y + (bs), x - (bs), y + (bs * 0.548), x - (bs), y);
+
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = lineColor;
+    ctx.stroke();
+
+    // direction and velocity
+    var vec = nsGene.transformRotate(x, y, e.velocity, 0, e.angle);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(vec.x, vec.y);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "red";
+    ctx.stroke();
 };

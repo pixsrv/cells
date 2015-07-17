@@ -11,7 +11,7 @@ nsGene.config = {
     canvasSizeX   : 500,
     canvasSizeY   : 500,
 
-    entityInitialCount: 50,
+    entityInitialCount: 100,
     entityMinCount    : 0,
     entityMaxCount    : 2500,
 
@@ -32,40 +32,47 @@ nsGene.World.prototype.go = function () {
 
     var entityCount = entities.length;
 
-    // traverse entities
-    for (var i = 1; i < entityCount; i++) {
-        var e = entities[i];
-
-        // move and validate position within world boundries
-        var x = e.x + nsGene.randomRange(-config.entityMoveStep, config.entityMoveStep);
-        var y = e.y + nsGene.randomRange(-config.entityMoveStep, config.entityMoveStep);
-        e.x = x < e.entity.genes.bodysize.value ? e.entity.genes.bodysize.value : x > config.canvasSizeX - e.entity.genes.bodysize.value ? config.canvasSizeX - e.entity.genes.bodysize.value : x;
-        e.y = y < e.entity.genes.bodysize.value ? e.entity.genes.bodysize.value : y > config.canvasSizeY - e.entity.genes.bodysize.value ? config.canvasSizeY - e.entity.genes.bodysize.value : y;
-    }
-
     // interaction between close entities
     for (i = 1; i < entityCount; i++) {
         var entityA = entities[i];
+
+        if (entities.length < 3)
+            var f = 0;
 
         for (var j = 1; j < entityCount; j++) {
             if (i == j) continue;
 
             var entityB = entities[j];
 
-            // distance
-            var d = parseInt(Math.sqrt((entityA.x - entityB.x) * (entityA.x - entityB.x) + (entityA.y - entityB.y) * (entityA.y - entityB.y)));
+            var interaction = nsGene.calcInteraction(entityA, entityB);
 
             // minimum distance
             var mD = entityA.entity.genes.bodysize.value + entityB.entity.genes.bodysize.value;
 
-            if (d < mD) {
-                entityA.entity.links.push({
-                    x: entityB.x,
-                    y: entityB.y
-                });
+            if (interaction.distance < mD) {
+                entityA.angle = nsGene.toDegrees(interaction.angle) - nsGene.randomRange(-90, 10);
+                entityB.angle = nsGene.toDegrees(interaction.angle) + 180-nsGene.randomRange(-10, 90);
             }
         }
+
+        // move and validate position within world boundries
+        var x = entityA.x;
+        var y = entityA.y;
+
+        var np = nsGene.transformRotate(x, y, entityA.velocity / 10, 0, entityA.angle);
+        x = np.x;
+        y = np.y;
+
+        entityA.velocity -= entityA.velocity / 10;
+        entityA.x = x < entityA.entity.genes.bodysize.value ? entityA.entity.genes.bodysize.value : x > config.canvasSizeX - entityA.entity.genes.bodysize.value ? config.canvasSizeX - entityA.entity.genes.bodysize.value : x;
+        entityA.y = y < entityA.entity.genes.bodysize.value ? entityA.entity.genes.bodysize.value : y > config.canvasSizeY - entityA.entity.genes.bodysize.value ? config.canvasSizeY - entityA.entity.genes.bodysize.value : y;
+
+        if (entityA.velocity < 1) {
+            entityA.angle = Math.floor((nsGene.random() * 360));
+            entityA.velocity = Math.floor((nsGene.random() * 20));
+        }
     }
+
 
     // animation part
     // clear canvas
@@ -90,53 +97,53 @@ nsGene.World.prototype.redraw = function () {
 
     for (var i = 1; i < nsGene.world.entities.length; i++) {
         var e = nsGene.world.entities[i];
-        e.entity.draw(e.x, e.y);
+        //e.entity.draw(e.x, e.y);
+        e.entity.draw2(e);
 
-        for (var l = 0; l < e.entity.links.length; l++) {
-            link = e.entity.links[l];
+        /*
+         for (var l = 0; l < e.entity.links.length; l++) {
+         link = e.entity.links[l];
 
-            dx = e.x - link.x;
-            dy = e.y - link.y;
-            dist = parseInt(Math.sqrt((dx) * (dx) + (dy) * (dy)));
+         dx = e.x - link.x;
+         dy = e.y - link.y;
+         dist = parseInt(Math.sqrt((dx) * (dx) + (dy) * (dy)));
 
-            switch (nsGene.quarter(e.x, e.y, link.x, link.y)) {
-                case 1:
-                    alpha = Math.atan(dy / dx);
-                    break;
-                case 2:
-                    alpha = Math.atan(dy / dx) - (Math.PI);
-                    break;
-                case 3:
-                    alpha = Math.atan(dy / dx) + (Math.PI);
-                    break;
-                case 4:
-                    alpha = Math.atan(dy / dx);
-                    break;
-            }
+         switch (nsGene.quarter(e.x, e.y, link.x, link.y)) {
+         case 1:
+         alpha = Math.atan(dy / dx);
+         break;
+         case 2:
+         alpha = Math.atan(dy / dx) - (Math.PI);
+         break;
+         case 3:
+         alpha = Math.atan(dy / dx) + (Math.PI);
+         break;
+         case 4:
+         alpha = Math.atan(dy / dx);
+         break;
+         }
 
-            // draw connection
-            var is = nsGene.calcIntersection(e.entity.genes.bodysize.value, e.entity.genes.bodysize.value, dist);
+         // draw connection
+         var is = nsGene.calcIntersection(e.entity.genes.bodysize.value, e.entity.genes.bodysize.value, dist);
 
-            nsGene.world.ctx.beginPath();
-            nsGene.world.ctx.arc(e.x, e.y, e.entity.genes.bodysize.value, alpha - is.alpha1, alpha + is.alpha1, true);
-            nsGene.world.ctx.fillStyle = "white";
-            nsGene.world.ctx.fill();
-            nsGene.world.ctx.lineWidth = 3;
-            //nsGene.world.ctx.strokeStyle = lineColor;
-            //nsGene.world.ctx.stroke();
+         nsGene.world.ctx.beginPath();
+         nsGene.world.ctx.arc(e.x, e.y, e.entity.genes.bodysize.value, alpha - is.alpha1, alpha + is.alpha1, true);
+         nsGene.world.ctx.fillStyle = "white";
+         nsGene.world.ctx.fill();
+         nsGene.world.ctx.lineWidth = 3;
 
-            // draw link between centers
-            //nsGene.world.ctx.beginPath();
-            var tr = nsGene.transformRotate(e.entity.genes.bodysize.value+1, 0, alpha + is.alpha1);
-            nsGene.world.ctx.moveTo(e.x + tr.x, e.y + tr.y);
-            var tr1 = nsGene.transformRotate(e.entity.genes.bodysize.value+1, 0, alpha - is.alpha1);
-            nsGene.world.ctx.lineTo(e.x + tr1.x, e.y + tr1.y);
-            nsGene.world.ctx.lineWidth = 1.5;
-            nsGene.world.ctx.lineJoin = "round";
-            nsGene.world.ctx.strokeStyle = "darkgreen";
-            nsGene.world.ctx.stroke();
-        }
+         // draw link between centers
+         var tr = nsGene.transformRotate(e.entity.genes.bodysize.value+1, 0, alpha + is.alpha1);
+         nsGene.world.ctx.moveTo(e.x + tr.x, e.y + tr.y);
+         var tr1 = nsGene.transformRotate(e.entity.genes.bodysize.value+1, 0, alpha - is.alpha1);
+         nsGene.world.ctx.lineTo(e.x + tr1.x, e.y + tr1.y);
+         nsGene.world.ctx.lineWidth = 1.5;
+         nsGene.world.ctx.lineJoin = "round";
+         nsGene.world.ctx.strokeStyle = "darkgreen";
+         nsGene.world.ctx.stroke();
+         }
+         */
 
-        e.entity.links.splice(0, e.entity.links.length);
+        //e.entity.links.splice(0, e.entity.links.length);
     }
 };

@@ -2,19 +2,20 @@
  * Created on 2015-07-10.
  */
 
-window.nsGene = window.nsGene || { };
+window.nsGene = window.nsGene || {};
 
-nsGene.init = (function(){
+nsGene.init = (function () {
 
     nsGene.world = new nsGene.World();
 
-    for(var i = 1; i <= nsGene.config.entityInitialCount; i++){
-        var e = {};
-        e["entity"] = new nsGene.Entity();
-        e["x"] = Math.floor((nsGene.random() * nsGene.config.canvasSizeX));
-        e["y"] = Math.floor((nsGene.random() * nsGene.config.canvasSizeY));
-
-        nsGene.world.entities[i] = e;
+    for (var i = 1; i <= nsGene.config.entityInitialCount; i++) {
+        nsGene.world.entities[i] = {
+            entity  : new nsGene.Entity(),
+            x       : Math.floor((nsGene.random() * nsGene.config.canvasSizeX)),
+            y       : Math.floor((nsGene.random() * nsGene.config.canvasSizeY)),
+            angle   : Math.floor((nsGene.random() * 360)),
+            velocity: Math.floor((nsGene.random() * 20))
+        };
     }
 
     nsGene.world.go(1);

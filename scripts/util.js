@@ -48,12 +48,30 @@ nsGene.quarter = function (x1, y1, x2, y2) {
     }
 };
 
-nsGene.transformRotate = function (x, y, a) {
-
-    var xt = parseInt(x * Math.cos(a) - y * Math.sin(a));
-    var yt = parseInt(x * Math.sin(a) + y * Math.cos(a));
-
+nsGene.transformRotate = function (cx, cy, x, y, angle) {
+    var radians = nsGene.toRadians(angle),
+        cos = Math.cos(radians),
+        sin = Math.sin(radians),
+        xt = (cos * (x)) - (sin * (y)) + cx,
+        yt = (cos * (y)) + (sin * (x)) + cy;
     return {x: xt, y: yt};
+};
+
+nsGene.transformTranslate = function (cx, cy, dx, dy) {
+    return {x: cx + dx, y: cy + dy};
+};
+
+nsGene.calcInteraction = function (eA, eB) {
+    var distance = parseInt(Math.sqrt((eA.x - eB.x) * (eA.x - eB.x) + (eA.y - eB.y) * (eA.y - eB.y)));
+    var dy = eB.y - eA.y;
+    var sin = dy / distance;
+    sin = sin < -1 ? -1 : sin > 1 ? 1 : sin;
+    var angle = -Math.asin(sin);
+
+    return {
+        distance: distance,
+        angle   : angle
+    }
 };
 
 nsGene.calcIntersection = function (r1, r2, dist) {
@@ -70,4 +88,10 @@ nsGene.calcIntersection = function (r1, r2, dist) {
         alpha1: alpha1,
         alpha2: alpha2
     }
+};
+nsGene.toDegrees = function (angle) {
+    return angle * (180 / Math.PI);
+};
+nsGene.toRadians = function (angle) {
+    return angle * (Math.PI / 180);
 };
