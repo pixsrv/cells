@@ -19,7 +19,7 @@ nsGene.Entity = function Entity() {
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 15,
+            "value"        : 30,
             "min"          : 3,
             "max"          : "undefined"
         })

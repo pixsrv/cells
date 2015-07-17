@@ -64,9 +64,26 @@ nsGene.transformTranslate = function (cx, cy, dx, dy) {
 nsGene.calcInteraction = function (eA, eB) {
     var distance = parseInt(Math.sqrt((eA.x - eB.x) * (eA.x - eB.x) + (eA.y - eB.y) * (eA.y - eB.y)));
     var dy = eB.y - eA.y;
-    var sin = dy / distance;
+    var angle;
+    var sin = dy / (distance == 0 ? 1 : distance);
     sin = sin < -1 ? -1 : sin > 1 ? 1 : sin;
-    var angle = -Math.asin(sin);
+
+    switch (nsGene.quarter(eA.x, eA.y, eB.x, eB.y)) {
+        case 1:
+            angle = Math.asin(sin) - (Math.PI);
+            break;
+        case 2:
+            angle = -Math.asin(sin);
+            break;
+        case 3:
+            angle = -Math.asin(sin);
+            break;
+        case 4:
+            angle = Math.asin(sin) - (Math.PI);
+            break;
+    }
+
+    //var angle = -Math.asin(sin);
 
     return {
         distance: distance,
