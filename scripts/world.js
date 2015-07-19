@@ -12,7 +12,7 @@ nsGene.config = {
     canvasSizeX: 500,
     canvasSizeY: 500,
 
-    entityInitialCount: 80,
+    entityInitialCount: 75,
     //entityInitialCount: 66,
     //entityInitialCount: 2,
     //entityInitialCount: 5,
@@ -77,7 +77,7 @@ nsGene.World.prototype.go = function () {
         if (vec.length != 0) {
             var v = nsGene.calcVectorSum(vec, entityA.x, entityA.y);
             var aDeg = nsGene.toDegrees(v.direction);
-            entityA.direction = aDeg+ nsGene.randomRange(-10, 10);
+            entityA.direction = aDeg + nsGene.randomRange(-10, 10);
             entityA.velocity = entityA.cell.genes.bodysize.value * (5 / v.distance);
         } else {
             entityA.direction = 0;
@@ -85,16 +85,14 @@ nsGene.World.prototype.go = function () {
         }
 
         // move and validate position within world boundaries
-        newPoint = nsGene.transformRotate(entityA.x, entityA.y, entityA.velocity / 10, 0, entityA.direction);
+        newPoint = nsGene.transformRotate(entityA.x, entityA.y, entityA.velocity / 2, 0, entityA.direction);
 
         // horizontal
         if (newPoint.x < entityA.cell.genes.bodysize.value + 2) {
             entityA.x = entityA.cell.genes.bodysize.value + 2;
-            //entityA.direction = nsGene.toDegrees(0) + nsGene.randomRange(-15, 15);
         } else {
             if (newPoint.x > config.canvasSizeX - entityA.cell.genes.bodysize.value - 2) {
                 entityA.x = config.canvasSizeX - entityA.cell.genes.bodysize.value - 2;
-                //entityA.direction = nsGene.toDegrees(180) + nsGene.randomRange(-15, 15);
             } else {
                 entityA.x = newPoint.x;
             }
@@ -103,21 +101,12 @@ nsGene.World.prototype.go = function () {
         // vertical
         if (newPoint.y < entityA.cell.genes.bodysize.value + 2) {
             entityA.y = entityA.cell.genes.bodysize.value + 2;
-            //entityA.direction = nsGene.toDegrees(90) + nsGene.randomRange(-15, 15);
         } else {
             if (newPoint.y > config.canvasSizeX - entityA.cell.genes.bodysize.value - 2) {
                 entityA.y = config.canvasSizeX - entityA.cell.genes.bodysize.value - 2;
-                //entityA.direction = nsGene.toDegrees(270) + nsGene.randomRange(-15, 15);
             } else {
                 entityA.y = newPoint.y;
             }
-        }
-
-        //entityA.velocity -= entityA.velocity / 10;
-
-        if (entityA.velocity < 1) {
-            //entityA.direction = Math.floor((nsGene.random() * 360));
-            //entityA.velocity = Math.floor((nsGene.random() * 20));
         }
     }
 

@@ -19,7 +19,7 @@ nsGene.Cell = function Cell() {
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 15 + nsGene.randomRange(-10, 32),
+            "value"        : 15 + nsGene.randomRange(-10, 35),
             //"value"        : 20,
             //"value"        : 160,
             //"value"        : 102,
