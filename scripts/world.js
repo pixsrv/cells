@@ -7,32 +7,46 @@ window.nsGene = window.nsGene || {};
 nsGene.config = {
     isRunning: true,
 
-    entityMoveStep: 1,
-    canvasSizeX   : 800,
-    canvasSizeY   : 800,
+    seed: 789,
 
-    entityInitialCount: 170,
-    entityMinCount    : 0,
-    entityMaxCount    : 2500,
+    canvasSizeX: 500,
+    canvasSizeY: 500,
+
+    entityInitialCount: 80,
+    //entityInitialCount: 66,
+    //entityInitialCount: 2,
+    //entityInitialCount: 5,
+
+    entityMinCount: 0,
+    entityMaxCount: 2500,
+    entityMoveStep: 1,
 
     turnMaxCount: -1,
 
-    drawForces: true
+    drawLink   : true,
+    drawForces : true,
+    drawTensors: true,
+
+    drawIDs     : true,
+    drawVertexes: true
 };
 
 nsGene.World = function World() {
     this.ctx = document.getElementById("playground").getContext("2d");
-    this.entities = [];
+    this.ctx.font = "10px Arial";
 
-    nsGene.seed = 789;
+    this.entities = [];
 };
 
 nsGene.World.prototype.go = function () {
+    if (arguments[0] == 1) nsGene.config.isRunning = true;
+    if (!nsGene.config.isRunning) return;
+    if (arguments[0] == 1) nsGene.config.isRunning = false;
+
     // create shortcut names
     var entities = nsGene.world.entities;
     var config = nsGene.config;
 
-    var entityCount = entities.length;
     var entityA;
     var entityB;
     var interaction;
@@ -40,63 +54,69 @@ nsGene.World.prototype.go = function () {
     var newPoint;
 
     // interaction between close entities
-    for (i = 1; i < entityCount; i++) {
+    for (var i = 1; i < entities.length; i++) {
         entityA = entities[i];
 
-        for (var j = 1; j < entityCount; j++) {
+        var vec = [];
+
+        for (var j = 1; j < entities.length; j++) {
             if (i == j) continue;
 
             entityB = entities[j];
             interaction = nsGene.calcInteraction(entityA, entityB);
-            minDistance = entityA.entity.genes.bodysize.value + entityB.entity.genes.bodysize.value;
+            minDistance = entityA.cell.genes.bodysize.value + entityB.cell.genes.bodysize.value;
 
             if (interaction.distance < minDistance) {
-                entityA.angle = nsGene.toDegrees(interaction.angle) + nsGene.randomRange(-15, 15);
-                entityB.angle = nsGene.toDegrees(interaction.angle) - 180 + nsGene.randomRange(-15, 15);
-
-                entityA.velocity = entityA.entity.genes.bodysize.value * (5 / interaction.distance);
-                entityB.velocity = entityB.entity.genes.bodysize.value * (5 / interaction.distance);
-            }
-
-            if (interaction.distance < minDistance / 5) {
-                entityA.velocity = Math.floor((nsGene.random() * 10));
-                entityB.velocity = Math.floor((nsGene.random() * 10));
+                vec.push({
+                    distance : interaction.distance,
+                    direction: interaction.direction
+                });
             }
         }
 
+        if (vec.length != 0) {
+            var v = nsGene.calcVectorSum(vec, entityA.x, entityA.y);
+            var aDeg = nsGene.toDegrees(v.direction);
+            entityA.direction = aDeg+ nsGene.randomRange(-10, 10);
+            entityA.velocity = entityA.cell.genes.bodysize.value * (5 / v.distance);
+        } else {
+            entityA.direction = 0;
+            entityA.velocity = 0;
+        }
+
         // move and validate position within world boundaries
-        newPoint = nsGene.transformRotate(entityA.x, entityA.y, entityA.velocity / 10, 0, entityA.angle);
+        newPoint = nsGene.transformRotate(entityA.x, entityA.y, entityA.velocity / 10, 0, entityA.direction);
 
         // horizontal
-        if (newPoint.x < entityA.entity.genes.bodysize.value + 2) {
-            entityA.x = entityA.entity.genes.bodysize.value + 2;
-            entityA.angle = nsGene.toDegrees(0) + nsGene.randomRange(-15, 15);
+        if (newPoint.x < entityA.cell.genes.bodysize.value + 2) {
+            entityA.x = entityA.cell.genes.bodysize.value + 2;
+            //entityA.direction = nsGene.toDegrees(0) + nsGene.randomRange(-15, 15);
         } else {
-            if (newPoint.x > config.canvasSizeX - entityA.entity.genes.bodysize.value - 2) {
-                entityA.x = config.canvasSizeX - entityA.entity.genes.bodysize.value - 2;
-                entityA.angle = nsGene.toDegrees(180) + nsGene.randomRange(-15, 15);
+            if (newPoint.x > config.canvasSizeX - entityA.cell.genes.bodysize.value - 2) {
+                entityA.x = config.canvasSizeX - entityA.cell.genes.bodysize.value - 2;
+                //entityA.direction = nsGene.toDegrees(180) + nsGene.randomRange(-15, 15);
             } else {
                 entityA.x = newPoint.x;
             }
         }
 
         // vertical
-        if (newPoint.y < entityA.entity.genes.bodysize.value + 2) {
-            entityA.y = entityA.entity.genes.bodysize.value + 2;
-            entityA.angle = nsGene.toDegrees(90) + nsGene.randomRange(-15, 15);
+        if (newPoint.y < entityA.cell.genes.bodysize.value + 2) {
+            entityA.y = entityA.cell.genes.bodysize.value + 2;
+            //entityA.direction = nsGene.toDegrees(90) + nsGene.randomRange(-15, 15);
         } else {
-            if (newPoint.y > config.canvasSizeX - entityA.entity.genes.bodysize.value - 2) {
-                entityA.y = config.canvasSizeX - entityA.entity.genes.bodysize.value - 2;
-                entityA.angle = nsGene.toDegrees(270) + nsGene.randomRange(-15, 15);
+            if (newPoint.y > config.canvasSizeX - entityA.cell.genes.bodysize.value - 2) {
+                entityA.y = config.canvasSizeX - entityA.cell.genes.bodysize.value - 2;
+                //entityA.direction = nsGene.toDegrees(270) + nsGene.randomRange(-15, 15);
             } else {
                 entityA.y = newPoint.y;
             }
         }
 
-        entityA.velocity -= entityA.velocity / 10;
+        //entityA.velocity -= entityA.velocity / 10;
 
         if (entityA.velocity < 1) {
-            //entityA.angle = Math.floor((nsGene.random() * 360));
+            //entityA.direction = Math.floor((nsGene.random() * 360));
             //entityA.velocity = Math.floor((nsGene.random() * 20));
         }
     }
@@ -117,6 +137,6 @@ nsGene.World.prototype.go = function () {
 nsGene.World.prototype.redraw = function () {
     for (var i = 1; i < nsGene.world.entities.length; i++) {
         var e = nsGene.world.entities[i];
-        e.entity.draw(e);
+        e.cell.draw(e, i);
     }
 };
