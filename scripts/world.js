@@ -12,7 +12,7 @@ nsGene.config = {
     canvasSizeX: 500,
     canvasSizeY: 500,
 
-    entityInitialCount: 75,
+    entityInitialCount: 74,
     //entityInitialCount: 66,
     //entityInitialCount: 2,
     //entityInitialCount: 5,

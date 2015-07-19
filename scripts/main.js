@@ -11,8 +11,8 @@ nsGene.init = (function () {
     for (var i = 1; i <= nsGene.config.entityInitialCount; i++) {
         nsGene.world.entities[i] = {
             cell     : new nsGene.Cell(),
-            x        : Math.floor((nsGene.random() * nsGene.config.canvasSizeX / 3)) + nsGene.config.canvasSizeX / 3,
-            y        : Math.floor((nsGene.random() * nsGene.config.canvasSizeY / 3)) + nsGene.config.canvasSizeY / 3,
+            x        : Math.floor((nsGene.random() * nsGene.config.canvasSizeX / 5)) + nsGene.config.canvasSizeX / 2.5,
+            y        : Math.floor((nsGene.random() * nsGene.config.canvasSizeY / 5)) + nsGene.config.canvasSizeY / 2.5,
             angle    : Math.floor((nsGene.random() * 360)),
             direction: Math.floor((nsGene.random() * 360)),
             velocity : Math.floor((nsGene.random() * 5))
