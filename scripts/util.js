@@ -60,7 +60,7 @@ nsGene.transformTranslate = function (cx, cy, dx, dy) {
 };
 
 nsGene.calcInteraction = function (eA, eB) {
-    var distance = parseInt(Math.sqrt((eA.x - eB.x) * (eA.x - eB.x) + (eA.y - eB.y) * (eA.y - eB.y)));
+    var distance = Math.sqrt((eA.x - eB.x) * (eA.x - eB.x) + (eA.y - eB.y) * (eA.y - eB.y));
     var angleRad = Math.atan2(eA.y - eB.y, eA.x - eB.x);
 
     return {

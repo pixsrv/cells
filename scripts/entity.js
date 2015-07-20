@@ -19,7 +19,7 @@ nsGene.Cell = function Cell() {
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 15 + nsGene.randomRange(-10, 35),
+            "value"        : 15 + nsGene.randomRange(-8, 12),
             //"value"        : 20,
             //"value"        : 160,
             //"value"        : 102,
@@ -93,7 +93,8 @@ nsGene.Cell.prototype.draw = function (e, id) {
 
         newPoint = nsGene.transformRotate(e.x, e.y, r * point[0], 0, point[1]);
 
-        if (i == 0 && cfg.drawVertexes)
+        //if (i == 0 && cfg.drawVertexes)
+        if (cfg.drawVertexes)
             ctx.fillText(i, newPoint.x, newPoint.y);
 
 

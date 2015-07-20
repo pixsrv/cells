@@ -12,7 +12,7 @@ nsGene.config = {
     canvasSizeX: 500,
     canvasSizeY: 500,
 
-    entityInitialCount: 74,
+    entityInitialCount: 210,
     //entityInitialCount: 66,
     //entityInitialCount: 2,
     //entityInitialCount: 5,
@@ -25,10 +25,10 @@ nsGene.config = {
 
     drawLink   : true,
     drawForces : true,
-    drawTensors: true,
+    drawTensors: false,
 
-    drawIDs     : true,
-    drawVertexes: true
+    drawIDs     : false,
+    drawVertexes: false
 };
 
 nsGene.World = function World() {
@@ -71,13 +71,33 @@ nsGene.World.prototype.go = function () {
                     distance : interaction.distance,
                     direction: interaction.direction
                 });
+
+/*
+                // recalc membrane tensors
+                var factor = interaction.distance / minDistance;
+                var minRange = interaction.direction - Math.PI/2;
+                var maxRange = interaction.direction + Math.PI/2;
+
+                var membrane = entityB.cell.genes.membrane.value;
+
+                for (var k = 0; k < membrane.length; k++) {
+                    var mVertex = membrane[k];
+                    if (mVertex[1] > nsGene.toDegrees(minRange) && mVertex[1] < nsGene.toDegrees(maxRange)) {
+                        if (mVertex[0] > factor)
+                            mVertex[0] -= mVertex[0] / 20;
+
+                        if (mVertex[0] < factor)
+                            mVertex[0] += mVertex[0] / 20;
+
+                    }
+                }
+*/
             }
         }
 
         if (vec.length != 0) {
             var v = nsGene.calcVectorSum(vec, entityA.x, entityA.y);
-            var aDeg = nsGene.toDegrees(v.direction);
-            entityA.direction = aDeg + nsGene.randomRange(-10, 10);
+            entityA.direction = nsGene.toDegrees(v.direction);
             entityA.velocity = entityA.cell.genes.bodysize.value * (5 / v.distance);
         } else {
             entityA.direction = 0;
