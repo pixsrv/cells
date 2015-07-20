@@ -19,10 +19,13 @@ nsGene.Cell = function Cell() {
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 15 + nsGene.randomRange(-8, 12),
             //"value"        : 20,
             //"value"        : 160,
-            //"value"        : 102,
+            //"value"        : 132,
+            "value"        : 15 + nsGene.randomRange(-8, 12),
+            //"value"        : 130,
+            //"value"        : 108,
+            //"value"        : 100 + nsGene.randomRange(-30, 10),
             "min"          : 3,
             "max"          : undefined
         }),
@@ -134,7 +137,7 @@ nsGene.Cell.prototype.draw = function (e, id) {
     }
 
     if (cfg.drawForces) {
-        newPoint = nsGene.transformRotate(x, y, e.velocity*5, 0, e.direction);
+        newPoint = nsGene.transformRotate(x, y, e.velocity*20, 0, e.direction);
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(newPoint.x, newPoint.y);

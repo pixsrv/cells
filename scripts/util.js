@@ -103,3 +103,19 @@ nsGene.toDegrees = function (angleRad) {
 nsGene.toRadians = function (angleDeg) {
     return angleDeg * (Math.PI / 180);
 };
+
+nsGene.calcIntersection = function (r1, r2, dist) {
+    var d1 = (-r1 * r1 + dist * dist + r2 * r2) / (2 * dist);
+    var d2 = dist - d1;
+    var a = Math.sqrt(r1 * r1 - d1 * d1);
+    var alpha1 = Math.asin(a / r1);
+    var alpha2 = Math.asin(a / r2);
+
+    return {
+        d1    : d1,
+        d2    : d2,
+        a     : a,
+        alpha1: alpha1,
+        alpha2: alpha2
+    }
+};
