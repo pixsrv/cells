@@ -119,3 +119,12 @@ nsGene.calcIntersection = function (r1, r2, dist) {
         alpha2: alpha2
     }
 };
+
+nsGene.calcDeflection = function (eA, eB, vector) {
+    var mA = eA.mass;
+    var mB = eB.mass;
+
+    var vA = eA.velocity;
+    var vB = eB.velocity;
+
+};

@@ -12,18 +12,18 @@ nsGene.config = {
     canvasSizeX: 500,
     canvasSizeY: 500,
 
-    entityInitialCount: 180,
+    //entityInitialCount: 180,
     //entityInitialCount: 66,
     //entityInitialCount: 2,
-    //entityInitialCount: 3,
+    //entityInitialCount: 4,
     //entityInitialCount: 5,
-    //entityInitialCount: 7,
+    entityInitialCount: 12,
 
     entityMinCount: 0,
     entityMaxCount: 2500,
     entityMoveStep: 1,
 
-    viscosity: .5,
+    viscosity: .1, // TODO: rename to growth medium viscosity
 
     turnMaxCount: -1,
 
@@ -70,8 +70,9 @@ nsGene.World.prototype.go = function () {
             entityB = entities[j];
             interaction = nsGene.calcInteraction(entityA, entityB);
             minDistance = entityA.cell.genes.bodysize.value + entityB.cell.genes.bodysize.value;
+            var membrane = entityA.cell.genes.membrane.value;
 
-            if (interaction.distance < minDistance) {
+            if (interaction.distance < minDistance-15) {
                 vec.push({
                     distance : interaction.distance * entityB.cell.genes.bodysize.value * .1,
                     direction: interaction.direction
@@ -81,33 +82,27 @@ nsGene.World.prototype.go = function () {
                 entityB.velocity = 0;
 
                 // recalc membrane tensors
-                /*
-                 var factor = interaction.distance / minDistance;
-                 var intersections = nsGene.calcIntersection(entityA.cell.genes.bodysize.value, entityB.cell.genes.bodysize.value, interaction.distance);
-                 var minRange = interaction.direction - nsGene.toRadians(180) - intersections.alpha1;
-                 var maxRange = interaction.direction + nsGene.toRadians(180) + intersections.alpha2;
+                var intersections = nsGene.calcIntersection(entityA.cell.genes.bodysize.value, entityB.cell.genes.bodysize.value, interaction.distance);
+                var minRange = interaction.direction + nsGene.toRadians(180) - intersections.alpha1;
+                var maxRange = interaction.direction + nsGene.toRadians(180) + intersections.alpha1;
 
-                 var membrane = entityA.cell.genes.membrane.value;
 
-                 for (var k = 0; k < membrane.length; k++) {
-                 var mVertex = membrane[k];
+                for (var k = 0; k < membrane.length; k++) {
+                    var mVertex = membrane[k];
 
-                 if (mVertex[1] > nsGene.toDegrees(minRange) && mVertex[1] < nsGene.toDegrees(maxRange)) {
-                 if (mVertex[0] > factor)
+                    var an = interaction.direction - nsGene.toRadians(mVertex[1]);
+                    var xf = Math.abs(intersections.d1 / Math.cos(an));
+                    var dd = xf / entityA.cell.genes.bodysize.value;
 
-                 //mVertex[0] -= mVertex[0] / 10;
-                 mVertex[0] = factor;
-                 } else {
-                 for (var l = 0; l < membrane.length; l++) {
-                 if (k == l)continue;
-                 if (membrane[l][0] > 1)continue;
-
-                 membrane[l][0] += factor / 23;
-                 //membrane[l][0] += factor / 10;
-                 }
-                 }
-                 }
-                 */
+                    if (mVertex[1] > nsGene.toDegrees(minRange) && mVertex[1] < nsGene.toDegrees(maxRange)) {
+                        if (mVertex[0] > dd)
+                            mVertex[0] = dd;
+                    } else {
+                        mVertex[0] += mVertex[0] / 10;
+                        mVertex[0] = mVertex[0] > 1 ? 1 : mVertex[0];
+                    }
+                }
+            } else {
             }
         }
 
@@ -127,11 +122,11 @@ nsGene.World.prototype.go = function () {
         if (newPoint.x < entityA.cell.genes.bodysize.value + 2) {
             entityA.x = entityA.cell.genes.bodysize.value + 2;
             // TODO: calculate reflection
-            entityA.velocity=0;
+            entityA.velocity = 0;
         } else {
             if (newPoint.x > config.canvasSizeX - entityA.cell.genes.bodysize.value - 2) {
                 entityA.x = config.canvasSizeX - entityA.cell.genes.bodysize.value - 2;
-                entityA.velocity=0;
+                entityA.velocity = 0;
             } else {
                 entityA.x = newPoint.x;
             }
@@ -140,11 +135,11 @@ nsGene.World.prototype.go = function () {
         // vertical
         if (newPoint.y < entityA.cell.genes.bodysize.value + 2) {
             entityA.y = entityA.cell.genes.bodysize.value + 2;
-            entityA.velocity=0;
+            entityA.velocity = 0;
         } else {
             if (newPoint.y > config.canvasSizeX - entityA.cell.genes.bodysize.value - 2) {
                 entityA.y = config.canvasSizeX - entityA.cell.genes.bodysize.value - 2;
-                entityA.velocity=0;
+                entityA.velocity = 0;
             } else {
                 entityA.y = newPoint.y;
             }
