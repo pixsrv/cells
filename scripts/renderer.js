@@ -33,9 +33,7 @@ nsGene.Renderer = function Renderer() {
     });
 
 
-
 };
-
 
 
 //nsGene.Renderer.prototype.ctx.addEventListener('mousemove', function (e) {
@@ -80,59 +78,38 @@ nsGene.Renderer.prototype.redraw = function () {
 
 /**
  *
- * @param e
+ * @param entity
  */
-nsGene.Renderer.prototype.drawEntity = function (e) {
+nsGene.Renderer.prototype.drawEntity = function (entity) {
     var ctx = this.ctx;
     var cfg = nsGene.config;
 
-    var genes = e.cell.genes;
+    var genes = entity.cell.genes;
     var bodyColor = nsGene.colorGene2hex2(genes.bodycolor);
     var membraneColor = nsGene.rgb2hex(genes.membranecolor.value[0], genes.membranecolor.value[1], genes.membranecolor.value[2]);
 
-    var x = e.x;
-    var y = e.y;
+    var x = entity.x;
+    var y = entity.y;
     var r = genes.bodysize.value;
-    var startPoint = nsGene.transformRotate(x, y, r, 0, e.angle);
+    var startPoint = nsGene.transformRotate(x, y, r, 0, entity.angle);
     var startAngle = 90 + (360 / genes.membranedef.value / 2);
 
     var membrane = genes.membranepolar.value;
-    var angleDeg = 360 / membrane.length;
-    var perfectLength = 2 * r * Math.sin(nsGene.toRadians(angleDeg / 2));
-
 
     // draw membrane
     ctx.beginPath();
     ctx.fillStyle = membraneColor;
     ctx.moveTo(startPoint.x, startPoint.y);
 
-    var point;
     for (var s = 0; s < membrane.length - 1; s++) {
-        var segment = membrane[s];
-        var a = segment.angleDeg;
-        var l = segment.length;
-
-        var lengthDiff = (perfectLength - l) / nsGene.randomRange(50, 80);
-        lengthDiff = Math.abs(lengthDiff) < .0001 ? .0001 : lengthDiff;
-
-        var angleDiff = (angleDeg - a) / nsGene.randomRange(50, 100);
-        angleDiff = Math.abs(angleDiff) < .0001 ? .0001 : angleDiff;
-
-
-        if (s == 0) {
-            point = nsGene.transformRotate(startPoint.x, startPoint.y, l + lengthDiff, 0, startAngle);
-        } else {
-            point = nsGene.transformRotate(startPoint.x, startPoint.y, l + lengthDiff, 0, startAngle + (s * a + angleDiff));
-        }
-        startPoint = point;
-
-        ctx.lineTo(point.x, point.y);
+        startPoint = nsGene.transformRotate(startPoint.x, startPoint.y, membrane[s].length, 0, startAngle + (s != 0 ? (s * membrane[s].angleDeg) : 0));
+        ctx.lineTo(startPoint.x, startPoint.y);
     }
 
     ctx.closePath();
 
     // draw body (inside)
-    if (e.velocity > 0.001)
+    if (entity.velocity > 0.001)
         ctx.fillStyle = "rgba(255, 200, 200, .5)";
     else
         ctx.fillStyle = bodyColor;
@@ -149,16 +126,16 @@ nsGene.Renderer.prototype.drawEntity = function (e) {
 
         for (i = 0; i < membrane.length; i++) {
             point = membrane[i];
-            newPoint = nsGene.transformRotate(e.x, e.y, r * point[0], 0, point[1]);
+            newPoint = nsGene.transformRotate(entity.x, entity.y, r * point[0], 0, point[1]);
 
-            ctx.moveTo(e.x, e.y);
+            ctx.moveTo(entity.x, entity.y);
             ctx.lineTo(newPoint.x, newPoint.y);
         }
         ctx.stroke();
     }
 
     if (cfg.drawForces) {
-        newPoint = nsGene.transformRotate(x, y, e.velocity * 20, 0, e.direction);
+        newPoint = nsGene.transformRotate(x, y, entity.velocity * 20, 0, entity.direction);
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(newPoint.x, newPoint.y);

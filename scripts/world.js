@@ -110,19 +110,14 @@ nsGene.World.prototype.createEntity = function () {
     return entity;
 };
 
-nsGene.World.prototype.inflate = function (entity, percent) {
+nsGene.World.prototype.pump = function (entity, percent) {
     var x = entity.x;
     var y = entity.y;
 
     var genes = entity.cell.genes;
-    var membrane = genes.membranepolar.value;
-    var segment;
 
-    for (var s = 0; s < membrane.length - 1; s++) {
-        segment = membrane[s];
+    genes.bodysize.value += (genes.bodysize.value * percent / 100);
 
-        segment.length *= (percent / 100);
-    }
 };
 
 

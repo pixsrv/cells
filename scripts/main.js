@@ -8,7 +8,7 @@ nsGene.init = (function () {
 
     nsGene.world = new nsGene.World();
     //nsGene.world.populate();
-    nsGene.world.schemaPopulate(1);
+    nsGene.world.schemaPopulate(4);
 
     nsGene.renderer = new nsGene.Renderer();
 
@@ -28,5 +28,17 @@ nsGene.step = function () {
 
 nsGene.clear = function () {
     nsGene.world.entities = [];
+    nsGene.renderer.render(1);
+};
+
+nsGene.pumpUp = function () {
+    var w = nsGene.world;
+    w.pump(w.entities[0], 10);
+    nsGene.renderer.render(1);
+};
+
+nsGene.pumpDown = function () {
+    var w = nsGene.world;
+    w.pump(w.entities[0], -10);
     nsGene.renderer.render(1);
 };

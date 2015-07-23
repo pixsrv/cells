@@ -49,7 +49,7 @@ nsGene.Cell = function Cell() {
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 12,
+            "value"        : 32,
             "min"          : undefined,
             "max"          : undefined
         }),
@@ -115,28 +115,25 @@ nsGene.Cell.prototype.process = function (entity) {
 
 
     // process membrane
-    var point;
     for (var s = 0; s < membrane.length - 1; s++) {
         var segment = membrane[s];
         var a = segment.angleDeg;
         var l = segment.length;
 
-        var lengthDiff = (perfectLength - l) / nsGene.randomRange(50, 80);
+        var lengthDiff = (perfectLength - l) / nsGene.randomRange(30, 50);
         lengthDiff = Math.abs(lengthDiff) < .0001 ? .0001 : lengthDiff;
 
-        var angleDiff = (angleDeg - a) / nsGene.randomRange(50, 100);
+        var angleDiff = (angleDeg - a) / nsGene.randomRange(100, 200);
         angleDiff = Math.abs(angleDiff) < .0001 ? .0001 : angleDiff;
 
-        if (s == 0) {
-            point = nsGene.transformRotate(startPoint.x, startPoint.y, l + lengthDiff, 0, startAngle);
-        } else {
-            point = nsGene.transformRotate(startPoint.x, startPoint.y, l + lengthDiff, 0, startAngle + (s * a + angleDiff));
-        }
-        startPoint = point;
+        if (s == 0)
+            startPoint = nsGene.transformRotate(startPoint.x, startPoint.y, l + lengthDiff, 0, startAngle);
+        else
+            startPoint = nsGene.transformRotate(startPoint.x, startPoint.y, l + lengthDiff, 0, startAngle + (s * a + angleDiff));
+
         segment.angleDeg = a + angleDiff;
         segment.length = l + lengthDiff;
     }
-
 };
 
 
