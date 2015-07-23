@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title></title>
 
+    <script src="scripts/config.js"></script>
     <script src="scripts/util.js"></script>
-    <script src="scripts/entity.js"></script>
     <script src="scripts/world.js"></script>
+    <script src="scripts/entity.js"></script>
+    <script src="scripts/renderer.js"></script>
 </head>
+
 <body>
-<canvas id="playground" width="500" height="500" style="border:2px solid black;"></canvas>
+<canvas id="playground" width="700" height="700" style="border:2px solid black;"></canvas>
 <br>
 <button onclick="nsGene.start()">start</button>
 <button onclick="nsGene.step()">step</button>
-<!--<button onclick="nsGene.stop()">stop</button>-->
+<button onclick="nsGene.clear()">clear</button>
 
 <script src="scripts/main.js"></script>
 </body>

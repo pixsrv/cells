@@ -2,166 +2,140 @@
  * Created by pixel on 14.11.13.
  */
 
+
 window.nsGene = window.nsGene || {};
 
-nsGene.config = {
-    isRunning: true,
-
-    seed: 789,
-
-    canvasSizeX: 500,
-    canvasSizeY: 500,
-
-    //entityInitialCount: 180,
-    //entityInitialCount: 66,
-    //entityInitialCount: 2,
-    //entityInitialCount: 4,
-    //entityInitialCount: 5,
-    entityInitialCount: 12,
-
-    entityMinCount: 0,
-    entityMaxCount: 2500,
-    entityMoveStep: 1,
-
-    viscosity: .1, // TODO: rename to growth medium viscosity
-
-    turnMaxCount: -1,
-
-    drawLink   : true,
-    drawForces : true,
-    drawTensors: true,
-
-    drawIDs     : true,
-    drawVertexes: false
-};
 
 nsGene.World = function World() {
-    this.ctx = document.getElementById("playground").getContext("2d");
-    this.ctx.font = "10px Arial";
-
     this.entities = [];
 };
 
-nsGene.World.prototype.go = function () {
+
+nsGene.World.prototype.populate = function () {
+
+    for (var e = 0; e < nsGene.config.entityInitialCount; e++) {
+        var entity = this.createEntity();
+
+        // verify position
+
+        // horizontal
+        if (entity.x < entity.cell.genes.bodysize.value + 2)
+            entity.x = entity.cell.genes.bodysize.value + 2;
+        else if (entity.x > nsGene.config.canvasSizeX - entity.cell.genes.bodysize.value - 2)
+            entity.x = nsGene.config.canvasSizeX - entity.cell.genes.bodysize.value - 2;
+
+        // vertical
+        if (entity.y < entity.cell.genes.bodysize.value + 2)
+            entity.y = entity.cell.genes.bodysize.value + 2;
+        else if (entity.y > nsGene.config.canvasSizeX - entity.cell.genes.bodysize.value - 2)
+            entity.y = nsGene.config.canvasSizeX - entity.cell.genes.bodysize.value - 2;
+
+        this.entities.push(entity);
+    }
+};
+
+
+nsGene.World.prototype.schemaPopulate = function (count) {
+    var entity;
+
+    if (count > 0) {
+        entity = {
+            cell    : new nsGene.Cell(),
+            x       : 250,
+            y       : 250,
+            angle   : 0,
+            velocity: 0,
+            mass    : 1
+        };
+        entity.cell.createMembrane();
+        this.entities.push(entity);
+    }
+    if (count > 1) {
+        entity = {
+            cell     : new nsGene.Cell(),
+            x        : 330,
+            y        : 170,
+            angle    : 0,
+            direction: 0,
+            velocity : 0,
+            mass     : 1
+        };
+        entity.cell.createMembrane();
+        this.entities.push(entity);
+    }
+    if (count > 2) {
+
+        entity = {
+            cell     : new nsGene.Cell(),
+            x        : 170,
+            y        : 330,
+            angle    : 0,
+            direction: 0,
+            velocity : 0,
+            mass     : 1
+        };
+        entity.cell.createMembrane();
+        this.entities.push(entity);
+    }
+    if (count > 3) {
+
+        entity = {
+            cell     : new nsGene.Cell(),
+            x        : 330,
+            y        : 330,
+            angle    : 0,
+            direction: 0,
+            velocity : 0,
+            mass     : 1
+        };
+        entity.cell.createMembrane();
+        this.entities.push(entity);
+    }
+};
+
+
+nsGene.World.prototype.createEntity = function () {
+    var entity = {
+        cell    : new nsGene.Cell(),
+        x       : Math.floor((nsGene.random() * nsGene.config.canvasSizeX)),
+        y       : Math.floor((nsGene.random() * nsGene.config.canvasSizeY)),
+        //x        : nsGene.config.canvasSizeX / 2 + nsGene.randomRange(-70, 50),
+        //y        : nsGene.config.canvasSizeY / 2 + nsGene.randomRange(-50, 70),
+        angle   : Math.floor((nsGene.random() * 360)),
+        velocity: 0, //Math.floor((nsGene.random() * 5)),
+        mass    : 1
+    };
+    entity.cell.createMembrane();
+
+    return entity;
+};
+
+nsGene.World.prototype.inflate = function (entity, percent) {
+    var x = entity.x;
+    var y = entity.y;
+
+    var genes = entity.cell.genes;
+    var membrane = genes.membranepolar.value;
+    var segment;
+
+    for (var s = 0; s < membrane.length - 1; s++) {
+        segment = membrane[s];
+
+        segment.length *= (percent / 100);
+    }
+};
+
+
+nsGene.World.prototype.run = function () {
     if (arguments[0] == 1) nsGene.config.isRunning = true;
     if (!nsGene.config.isRunning) return;
     if (arguments[0] == 1) nsGene.config.isRunning = false;
 
-    // create shortcut names
     var entities = nsGene.world.entities;
-    var config = nsGene.config;
-
-    var entityA;
-    var entityB;
-    var interaction;
-    var minDistance;
-    var newPoint;
-
-
-    // interaction between close entities
-    for (var i = 0; i < entities.length; i++) {
-        entityA = entities[i];
-
-        var vec = [];
-
-        for (var j = 0; j < entities.length; j++) {
-            if (i == j) continue;
-
-            entityB = entities[j];
-            interaction = nsGene.calcInteraction(entityA, entityB);
-            minDistance = entityA.cell.genes.bodysize.value + entityB.cell.genes.bodysize.value;
-            var membrane = entityA.cell.genes.membrane.value;
-
-            if (interaction.distance < minDistance-15) {
-                vec.push({
-                    distance : interaction.distance * entityB.cell.genes.bodysize.value * .1,
-                    direction: interaction.direction
-                });
-
-                // TODO: calculate reflection
-                entityB.velocity = 0;
-
-                // recalc membrane tensors
-                var intersections = nsGene.calcIntersection(entityA.cell.genes.bodysize.value, entityB.cell.genes.bodysize.value, interaction.distance);
-                var minRange = interaction.direction + nsGene.toRadians(180) - intersections.alpha1;
-                var maxRange = interaction.direction + nsGene.toRadians(180) + intersections.alpha1;
-
-
-                for (var k = 0; k < membrane.length; k++) {
-                    var mVertex = membrane[k];
-
-                    var an = interaction.direction - nsGene.toRadians(mVertex[1]);
-                    var xf = Math.abs(intersections.d1 / Math.cos(an));
-                    var dd = xf / entityA.cell.genes.bodysize.value;
-
-                    if (mVertex[1] > nsGene.toDegrees(minRange) && mVertex[1] < nsGene.toDegrees(maxRange)) {
-                        if (mVertex[0] > dd)
-                            mVertex[0] = dd;
-                    } else {
-                        mVertex[0] += mVertex[0] / 10;
-                        mVertex[0] = mVertex[0] > 1 ? 1 : mVertex[0];
-                    }
-                }
-            } else {
-            }
-        }
-
-        if (vec.length != 0) {
-            var v = nsGene.calcVectorSum(vec, entityA.x, entityA.y);
-            entityA.direction = nsGene.toDegrees(v.direction);
-            entityA.velocity = (2 * entityB.cell.genes.bodysize.value) / Math.abs(v.distance);
-        } else {
-            entityA.velocity -= config.viscosity / entityB.cell.genes.bodysize.value;
-            entityA.velocity = entityA.velocity < 0 ? 0 : entityA.velocity;
-        }
-
-        // move and validate position within world boundaries
-        newPoint = nsGene.transformRotate(entityA.x, entityA.y, entityA.velocity, 0, entityA.direction);
-
-        // horizontal
-        if (newPoint.x < entityA.cell.genes.bodysize.value + 2) {
-            entityA.x = entityA.cell.genes.bodysize.value + 2;
-            // TODO: calculate reflection
-            entityA.velocity = 0;
-        } else {
-            if (newPoint.x > config.canvasSizeX - entityA.cell.genes.bodysize.value - 2) {
-                entityA.x = config.canvasSizeX - entityA.cell.genes.bodysize.value - 2;
-                entityA.velocity = 0;
-            } else {
-                entityA.x = newPoint.x;
-            }
-        }
-
-        // vertical
-        if (newPoint.y < entityA.cell.genes.bodysize.value + 2) {
-            entityA.y = entityA.cell.genes.bodysize.value + 2;
-            entityA.velocity = 0;
-        } else {
-            if (newPoint.y > config.canvasSizeX - entityA.cell.genes.bodysize.value - 2) {
-                entityA.y = config.canvasSizeX - entityA.cell.genes.bodysize.value - 2;
-                entityA.velocity = 0;
-            } else {
-                entityA.y = newPoint.y;
-            }
-        }
+    for (var e = 0; e < entities.length; e++) {
+        var entity = entities[e];
+        entity.cell.process(entity);
     }
 
-
-    // animation part
-    // clear canvas
-    nsGene.world.ctx.clearRect(0, 0, config.canvasSizeX, config.canvasSizeY);
-
-    // redraw entities
-    nsGene.world.redraw();
-
-    // request new frame
-    //webkitRequestAnimationFrame(nsGene.world.go);
-    requestAnimationFrame(nsGene.world.go);
-};
-
-nsGene.World.prototype.redraw = function () {
-    for (var i = 0; i < nsGene.world.entities.length; i++) {
-        var e = nsGene.world.entities[i];
-        e.cell.draw(e, i);
-    }
+    nsGene.renderer.render(arguments[0]);
 };

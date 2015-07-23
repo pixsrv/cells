@@ -24,8 +24,8 @@ nsGene.Cell = function Cell() {
             //"value"        : 132,
             //"value"        : 15 + nsGene.randomRange(-8, 12),
             //"value"        : 110,
-            //"value"        : 108,
-            "value"        : 95 + nsGene.randomRange(-35, 10),
+            //"value"        : 100,
+            "value"        : 80 + nsGene.randomRange(-55, 30),
             "min"          : 3,
             "max"          : undefined
         }),
@@ -33,21 +33,31 @@ nsGene.Cell = function Cell() {
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : [200, 255, 200],
+            "value"        : [nsGene.randomRange(200, 255), nsGene.randomRange(200, 255), nsGene.randomRange(200, 255)],
             "min"          : [0, 0, 0],
             "max"          : [255, 255, 255]
         }),
-        "membrane"         : new nsGene.Gene2({
+        "membranepolar"    : new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            /** membrane construction
-             * [radiusMultiplier1, angleDeg1, radiusMultiplier2, angleDeg2, ..., radiusMultiplierN, angleDegN]
-             */
-            "value"        : [
-                [1, 0], [1, 15], [1, 30], [1, 45], [1, 60], [1, 75], [1, 90], [1, 105], [1, 120], [1, 135], [1, 150], [1, 165], [1, 180],
-                [1, 195], [1, 210], [1, 225], [1, 240], [1, 255], [1, 270], [1, 285], [1, 300], [1, 315], [1, 330], [1, 345]
-            ],
+            "value"        : [],
+            "min"          : undefined,
+            "max"          : undefined
+        }),
+        "membranedef"      : new nsGene.Gene2({
+            "isInheritable": true,
+            "isEvolvable"  : true,
+            "isMutable"    : true,
+            "value"        : 12,
+            "min"          : undefined,
+            "max"          : undefined
+        }),
+        "membranexy"       : new nsGene.Gene2({
+            "isInheritable": true,
+            "isEvolvable"  : true,
+            "isMutable"    : true,
+            "value"        : undefined,
             "min"          : undefined,
             "max"          : undefined
         }),
@@ -70,84 +80,63 @@ nsGene.Cell = function Cell() {
     };
 };
 
-nsGene.Cell.prototype.draw = function (e, id) {
-    var ctx = nsGene.world.ctx;
-    var cfg = nsGene.config;
+nsGene.Cell.prototype.createMembrane = function (perfect) {
+    // membrane segment is an oriented vector
+    var genes = this.genes;
+    var segments = genes.membranedef.value;
+    var bodySize = genes.bodysize.value;
 
-    var genes = e.cell.genes;
-    var bodyColor = nsGene.colorGene2hex2(genes.bodycolor);
-    var membraneColor = nsGene.rgb2hex(genes.membranecolor.value[0], genes.membranecolor.value[1], genes.membranecolor.value[2]);
+    var angleDeg = 360 / segments;
+    var length = 2 * bodySize * Math.sin(nsGene.toRadians(angleDeg / 2));
 
-    var x = e.x;
-    var y = e.y;
-    var r = genes.bodysize.value;
-    var membrane = e.cell.genes.membrane.value;
+    for (var s = 0; s < segments; s++) {
+        var segment = {
+            index   : s,
+            length  : length + (perfect ? 0 : nsGene.randomRange(-length / .5, length / .5)),
+            angleDeg: angleDeg + (perfect ? 0 : nsGene.randomRange(-angleDeg / 3, angleDeg / 3))
+        };
 
-    var point;
-    var newPoint;
-
-    // nucleus polyline
-    ctx.beginPath();
-
-    // draw membrane
-    ctx.fillStyle = membraneColor;
-    for (var i = 0; i < membrane.length; i++) {
-        point = membrane[i];
-
-        newPoint = nsGene.transformRotate(e.x, e.y, r * point[0], 0, point[1]);
-
-        //if (i == 0 && cfg.drawVertexes)
-        if (cfg.drawVertexes)
-            ctx.fillText(i, newPoint.x, newPoint.y);
-
-
-        if (i == 0) {
-            ctx.moveTo(newPoint.x, newPoint.y);
-            continue;
-        }
-
-        ctx.lineTo(newPoint.x, newPoint.y);
-    }
-    ctx.closePath();
-
-    // draw body (inside)
-    if (e.velocity > 0.001)
-        ctx.fillStyle = "rgba(255, 200, 200, .5)";
-    else
-        ctx.fillStyle = bodyColor;
-
-    ctx.fill();
-    ctx.lineWidth = genes.membraneThickness.value;
-    ctx.strokeStyle = membraneColor;
-    ctx.stroke();
-
-    if (cfg.drawTensors) {
-        ctx.beginPath();
-        ctx.lineWidth = .08;
-        ctx.strokeStyle = "blue";
-
-        for (i = 0; i < membrane.length; i++) {
-            point = membrane[i];
-            newPoint = nsGene.transformRotate(e.x, e.y, r * point[0], 0, point[1]);
-
-            ctx.moveTo(e.x, e.y);
-            ctx.lineTo(newPoint.x, newPoint.y);
-        }
-        ctx.stroke();
-    }
-
-    if (cfg.drawForces) {
-        newPoint = nsGene.transformRotate(x, y, e.velocity * 20, 0, e.direction);
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(newPoint.x, newPoint.y);
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "red";
-        ctx.stroke();
-    }
-
-    if (cfg.drawIDs) {
-        ctx.fillStyle = "black";
-        ctx.fillText(id, x, y);
+        genes.membranepolar.value.push(segment)
     }
 };
+
+nsGene.Cell.prototype.process = function (entity) {
+    var genes = entity.cell.genes;
+
+    var x = entity.x;
+    var y = entity.y;
+    var r = genes.bodysize.value;
+    var startPoint = nsGene.transformRotate(x, y, r, 0, entity.angle);
+    var startAngle = 90 + (360 / genes.membranedef.value / 2);
+
+    var membrane = genes.membranepolar.value;
+    var angleDeg = 360 / membrane.length;
+    var perfectLength = 2 * r * Math.sin(nsGene.toRadians(angleDeg / 2));
+
+
+    // process membrane
+    var point;
+    for (var s = 0; s < membrane.length - 1; s++) {
+        var segment = membrane[s];
+        var a = segment.angleDeg;
+        var l = segment.length;
+
+        var lengthDiff = (perfectLength - l) / nsGene.randomRange(50, 80);
+        lengthDiff = Math.abs(lengthDiff) < .0001 ? .0001 : lengthDiff;
+
+        var angleDiff = (angleDeg - a) / nsGene.randomRange(50, 100);
+        angleDiff = Math.abs(angleDiff) < .0001 ? .0001 : angleDiff;
+
+        if (s == 0) {
+            point = nsGene.transformRotate(startPoint.x, startPoint.y, l + lengthDiff, 0, startAngle);
+        } else {
+            point = nsGene.transformRotate(startPoint.x, startPoint.y, l + lengthDiff, 0, startAngle + (s * a + angleDiff));
+        }
+        startPoint = point;
+        segment.angleDeg = a + angleDiff;
+        segment.length = l + lengthDiff;
+    }
+
+};
+
+

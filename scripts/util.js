@@ -8,7 +8,7 @@ window.nsGene = window.nsGene || {};
  * @return {number}
  */
 nsGene.random = function Random() {
-    var x = Math.sin(nsGene.config.seed++) * 10000;
+    var x = Math.sin(++nsGene.config.seed) * 10000;
     return x - Math.floor(x);
 };
 
@@ -47,11 +47,11 @@ nsGene.colorGene2hex2 = function (gene) {
 
 nsGene.transformRotate = function (cx, cy, x, y, angleDeg) {
     //var angleRad = angleDeg,
-    var angleRad = nsGene.toRadians(angleDeg),
-        cos = Math.cos(angleRad),
-        sin = Math.sin(angleRad),
-        xt = (cos * (x)) - (sin * (y)) + cx,
-        yt = (cos * (y)) + (sin * (x)) + cy;
+    var angleRad = nsGene.toRadians(angleDeg);
+    var cos = Math.cos(angleRad);
+    var sin = Math.sin(angleRad);
+    var xt = (cos * (x)) - (sin * (y)) + cx;
+    var yt = (sin * (x)) + (cos * (y)) + cy;
     return {x: xt, y: yt};
 };
 
@@ -120,11 +120,59 @@ nsGene.calcIntersection = function (r1, r2, dist) {
     }
 };
 
-nsGene.calcDeflection = function (eA, eB, vector) {
-    var mA = eA.mass;
-    var mB = eB.mass;
+/**
+ *
+ * @param x x coordinate of tested point
+ * @param y y coordinate of tested point
+ * @param {Array} polygon array of xy pairs
+ * @returns {boolean}
+ */
+nsGene.calcPointInPolygon = function (x, y, polygon) {
+    var i = 0;
+    var j = 0;
+    var oddNODES = false;
+    var polyX = polygon.map(function (p) {
+        return p[0];
+    });
+    var polyY = polygon.map(function (p) {
+        return p[1];
+    });
 
-    var vA = eA.velocity;
-    var vB = eB.velocity;
+    for (i = 0; i < polygon.length; i++) {
+        j++;
 
+        if (j == polygon.length)
+            j = 0;
+
+        if (polyY[i] < y && polyY[j] >= y || polyY[j] < y && polyY[i] >= y)
+            if (polyX[i] + (y - polyY[i]) / (polyY[j] - polyY[i]) * (polyX[j] - polyX[i]) < x)
+                oddNODES = !oddNODES;
+    }
+
+    return oddNODES;
+};
+
+nsGene.convertPolar2Cartesian = function (x, y, r, polar) {
+    var pPoint = [];
+    var cartesian = [];
+    var cPoint = [];
+    var np;
+
+    for (var i = 0; i < polar.length; i++) {
+        pPoint = polar[i];
+        np = nsGene.transformRotate(x, y, r * pPoint[0], 0, pPoint[1]);
+        cartesian.push([np.x, np.y]);
+    }
+
+    return cartesian;
+};
+
+nsGene.getQadrant = function (x1, y1, x2, y2) {
+    if (x1 <= x2) {
+        if (y1 <= y2) return 1;
+        return 4;
+    } else {
+        if (y1 <= y2) return 2;
+        return 3;
+    }
 };
