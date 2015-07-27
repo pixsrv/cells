@@ -28,8 +28,8 @@ nsGene.Renderer = function Renderer() {
             mass    : 1
         };
         entity.crossing = [];
-        entity.cell.createMembrane();
-        entity.cell.convertMembrane2Cartesian(entity);
+        entity.cell.createMembranePolar();
+        entity.cell.membranePolar2Cartesian(entity);
         nsGene.world.entities.push(entity);
 */
 

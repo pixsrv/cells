@@ -52,7 +52,7 @@ nsGene.World.prototype.schemaPopulate = function (count) {
         };
         entity.crossing = [];
         entity.cell.genes.bodySize.value = 40;
-        entity.cell.createMembrane(true);
+        entity.cell.createMembranePolar(true);
         this.entities.push(entity);
     }
 
@@ -69,7 +69,7 @@ nsGene.World.prototype.schemaPopulate = function (count) {
             mass     : 1
         };
         entity.crossing = [];
-        entity.cell.createMembrane(true);
+        entity.cell.createMembranePolar(true);
         this.entities.push(entity);
     }
 
@@ -84,7 +84,7 @@ nsGene.World.prototype.schemaPopulate = function (count) {
             mass     : 1
         };
         entity.crossing = [];
-        entity.cell.createMembrane();
+        entity.cell.createMembranePolar();
         this.entities.push(entity);
     }
 
@@ -99,7 +99,7 @@ nsGene.World.prototype.schemaPopulate = function (count) {
             mass     : 1
         };
         entity.crossing = [];
-        entity.cell.createMembrane();
+        entity.cell.createMembranePolar();
         this.entities.push(entity);
     }
 };
@@ -115,7 +115,7 @@ nsGene.World.prototype.createEntity = function () {
         mass    : 1,
         crossing: []
     };
-    entity.cell.createMembrane();
+    entity.cell.createMembranePolar();
 
     return entity;
 };
@@ -136,15 +136,22 @@ nsGene.World.prototype.run = function () {
     if (arguments[0] == 1) nsGene.config.isRunning = false;
 
     var entities = nsGene.world.entities;
-    for (var e = 0; e < entities.length; e++) {
-        var entity = entities[e];
-        entity.cell.process(entity);
-        entity.crossing = [];
+    var entityA;
+    var entityB;
 
-        for (var f = 0; f < entities.length; f++) {
-            if (f == e) continue;
-            var entity2 = entities[f];
-            nsGene.World.prototype.calcIntersection2(entity, entity2);
+    for (var eA = 0; eA < entities.length; eA++) {
+        entityA = entities[eA];
+        entityA.cell.process(entityA);
+
+        entityA.crossing = [];
+
+        for (var eB = 0; eB < entities.length; eB++) {
+            if (eB == eA) continue;
+
+            entityB = entities[eB];
+            entityB.cell.process(entityB);
+
+            nsGene.World.prototype.intersect(entityA, entityB);
         }
     }
 
@@ -152,7 +159,7 @@ nsGene.World.prototype.run = function () {
 };
 
 
-nsGene.World.prototype.calcIntersection2 = function (entityA, entityB) {
+nsGene.World.prototype.intersect = function (entityA, entityB) {
     var membraneA = entityA.cell.genes.membraneXY.value;
     var membraneB = entityB.cell.genes.membraneXY.value;
 
@@ -161,20 +168,31 @@ nsGene.World.prototype.calcIntersection2 = function (entityA, entityB) {
     var vertexB1;
     var vertexB2;
 
+    var cp;
+
+    var newMembraneA = [];
+
     for (var vA = 0; vA < membraneA.length; vA++) {
         vertexA1 = membraneA[vA];
         vertexA2 = vA < membraneA.length - 1 ? membraneA[vA + 1] : vertexA2 = membraneA[0];
+
+        if (!nsGene.calcPointInPolygon(vertexA1.x, vertexA1.y, membraneB))
+            newMembraneA.push(vertexA1);
 
         for (var vB = 0; vB < membraneB.length; vB++) {
             vertexB1 = membraneB[vB];
             vertexB2 = vB < membraneB.length - 1 ? membraneB[vB + 1] : vertexB2 = membraneB[0];
 
             if (nsGene.crossing(vertexA1, vertexA2, vertexB1, vertexB2)) {
-                entityA.crossing.push({
+                cp = {
                     x: ((vertexA2.x - vertexA1.x) * (vertexB2.x * vertexB1.y - vertexB2.y * vertexB1.x) - (vertexB2.x - vertexB1.x) * (vertexA2.x * vertexA1.y - vertexA2.y * vertexA1.x)) / ((vertexA2.y - vertexA1.y) * (vertexB2.x - vertexB1.x) - (vertexB2.y - vertexB1.y) * (vertexA2.x - vertexA1.x)),
                     y: ((vertexB2.y - vertexB1.y) * (vertexA2.x * vertexA1.y - vertexA2.y * vertexA1.x) - (vertexA2.y - vertexA1.y) * (vertexB2.x * vertexB1.y - vertexB2.y * vertexB1.x)) / ((vertexB2.y - vertexB1.y) * (vertexA2.x - vertexA1.x) - (vertexA2.y - vertexA1.y) * (vertexB2.x - vertexB1.x))
-                });
+                };
+                newMembraneA.push(cp);
+
+                //entityA.crossing.push(cp);
             }
         }
     }
+    entityA.cell.genes.membraneXY.value = newMembraneA;
 };

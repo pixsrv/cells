@@ -117,10 +117,10 @@ nsGene.calcPointInPolygon = function (x, y, polygon) {
     var j = 0;
     var oddNODES = false;
     var polyX = polygon.map(function (p) {
-        return p[0];
+        return p.x;
     });
     var polyY = polygon.map(function (p) {
-        return p[1];
+        return p.y;
     });
 
     for (i = 0; i < polygon.length; i++) {

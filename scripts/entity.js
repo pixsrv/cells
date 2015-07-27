@@ -14,9 +14,8 @@ nsGene.Gene2 = function Gene2(/*geneAsObject*/) {
 };
 
 nsGene.Cell = function Cell() {
-
     this.genes = {
-        "bodySize"             : new nsGene.Gene2({
+        "bodySize"         : new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
@@ -30,7 +29,7 @@ nsGene.Cell = function Cell() {
             "min"          : 3,
             "max"          : undefined
         }),
-        "bodyColor"            : new nsGene.Gene2({
+        "bodyColor"        : new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
@@ -38,15 +37,15 @@ nsGene.Cell = function Cell() {
             "min"          : [0, 0, 0],
             "max"          : [255, 255, 255]
         }),
-        "membraneRoughness"        : new nsGene.Gene2({
+        "membraneRoughness": new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 24,
+            "value"        : 7,
             "min"          : 3,
             "max"          : 48
         }),
-        "membranePolar"        : new nsGene.Gene2({
+        "membranePolar"    : new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
@@ -54,7 +53,7 @@ nsGene.Cell = function Cell() {
             "min"          : undefined,
             "max"          : undefined
         }),
-        "membraneXY"           : new nsGene.Gene2({
+        "membraneXY"       : new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
@@ -62,7 +61,7 @@ nsGene.Cell = function Cell() {
             "min"          : undefined,
             "max"          : undefined
         }),
-        "membraneColor"        : new nsGene.Gene2({
+        "membraneColor"    : new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
@@ -70,7 +69,7 @@ nsGene.Cell = function Cell() {
             "min"          : [0, 0, 0],
             "max"          : [255, 255, 255]
         }),
-        "membraneThickness"    : new nsGene.Gene2({
+        "membraneThickness": new nsGene.Gene2({
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
@@ -81,7 +80,7 @@ nsGene.Cell = function Cell() {
     };
 };
 
-nsGene.Cell.prototype.createMembrane = function (perfect) {
+nsGene.Cell.prototype.createMembranePolar = function (perfect) {
     // membrane segment is an oriented vector
     var genes = this.genes;
     var segments = genes.membraneRoughness.value;
@@ -91,13 +90,11 @@ nsGene.Cell.prototype.createMembrane = function (perfect) {
     var length = 2 * bodySize * Math.sin(nsGene.toRadians(angleDeg / 2));
 
     for (var s = 0; s < segments; s++) {
-        var segment = {
+        genes.membranePolar.value.push({
             index   : s,
             length  : length + (perfect ? 0 : nsGene.randomRange(-length / .5, length / .5)),
             angleDeg: angleDeg + (perfect ? 0 : nsGene.randomRange(-angleDeg / 3, angleDeg / 3))
-        };
-
-        genes.membranePolar.value.push(segment);
+        });
     }
 };
 
@@ -131,11 +128,11 @@ nsGene.Cell.prototype.process = function (entity) {
         segment.length = l + lengthDiff;
     }
 
-    nsGene.Cell.prototype.convertMembrane2Cartesian(entity);
+    nsGene.Cell.prototype.membranePolar2Cartesian(entity);
 };
 
 
-nsGene.Cell.prototype.convertMembrane2Cartesian = function (entity) {
+nsGene.Cell.prototype.membranePolar2Cartesian = function (entity) {
     // TODO: move to utils
     var genes = entity.cell.genes;
 
@@ -163,42 +160,3 @@ nsGene.Cell.prototype.convertMembrane2Cartesian = function (entity) {
         });
     }
 };
-
-
-nsGene.Cell.prototype.process2 = function (entity) {
-    var genes = entity.cell.genes;
-
-    var x = entity.x;
-    var y = entity.y;
-    var r = genes.bodySize.value;
-    var startPoint = nsGene.transformRotate(x, y, r, 0, entity.angle);
-    var startAngle = 90 + (360 / genes.membraneRoughness.value / 2);
-
-    var membrane = genes.membranePolar.value;
-    var angleDeg = 360 / membrane.length;
-    var perfectLength = 2 * r * Math.sin(nsGene.toRadians(angleDeg / 2));
-
-
-    // process membrane
-    for (var s = 0; s < membrane.length - 1; s++) {
-        var segment = membrane[s];
-        var a = segment.angleDeg;
-        var l = segment.length;
-
-        var lengthDiff = (perfectLength - l) / nsGene.randomRange(30, 50);
-        lengthDiff = Math.abs(lengthDiff) < .0001 ? .0001 : lengthDiff;
-
-        var angleDiff = (angleDeg - a) / nsGene.randomRange(100, 200);
-        angleDiff = Math.abs(angleDiff) < .0001 ? .0001 : angleDiff;
-
-        if (s == 0)
-            startPoint = nsGene.transformRotate(startPoint.x, startPoint.y, l + lengthDiff, 0, startAngle);
-        else
-            startPoint = nsGene.transformRotate(startPoint.x, startPoint.y, l + lengthDiff, 0, startAngle + (s * a + angleDiff));
-
-        segment.angleDeg = a + angleDiff;
-        segment.length = l + lengthDiff;
-    }
-};
-
-

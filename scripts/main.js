@@ -7,8 +7,8 @@ window.nsGene = window.nsGene || {};
 nsGene.init = (function () {
 
     nsGene.world = new nsGene.World();
-    nsGene.world.populate();
-    //nsGene.world.schemaPopulate(4);
+    //nsGene.world.populate();
+    nsGene.world.schemaPopulate(2);
 
     nsGene.renderer = new nsGene.Renderer();
 
