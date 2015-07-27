@@ -42,7 +42,7 @@ nsGene.Cell = function Cell() {
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 5,
+            "value"        : 12,
             "min"          : 3,
             "max"          : 48
         }),
@@ -136,6 +136,7 @@ nsGene.Cell.prototype.process = function (entity) {
 
 
 nsGene.Cell.prototype.convertMembrane2Cartesian = function (entity) {
+    // TODO: move to utils
     var genes = entity.cell.genes;
 
     var x = entity.x;

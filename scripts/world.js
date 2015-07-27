@@ -32,6 +32,9 @@ nsGene.World.prototype.populate = function () {
 
         this.entities.push(entity);
     }
+
+    // TEMP: cell 0 is large
+    this.entities[0].cell.genes.bodySize.value = 50;
 };
 
 
@@ -107,11 +110,10 @@ nsGene.World.prototype.createEntity = function () {
         cell    : new nsGene.Cell(),
         x       : Math.floor((nsGene.random() * nsGene.config.canvasSizeX)),
         y       : Math.floor((nsGene.random() * nsGene.config.canvasSizeY)),
-        //x        : nsGene.config.canvasSizeX / 2 + nsGene.randomRange(-70, 50),
-        //y        : nsGene.config.canvasSizeY / 2 + nsGene.randomRange(-50, 70),
         angle   : Math.floor((nsGene.random() * 360)),
         velocity: 0, //Math.floor((nsGene.random() * 5)),
-        mass    : 1
+        mass    : 1,
+        crossing: []
     };
     entity.cell.createMembrane();
 
@@ -151,36 +153,27 @@ nsGene.World.prototype.run = function () {
 
 
 nsGene.World.prototype.calcIntersection2 = function (entityA, entityB) {
-    var ma = entityA.cell.genes.membraneXY.value;
-    var mb = entityB.cell.genes.membraneXY.value;
+    var membraneA = entityA.cell.genes.membraneXY.value;
+    var membraneB = entityB.cell.genes.membraneXY.value;
 
-    var sa1;
-    var sa2;
-    var sb1;
-    var sb2;
+    var vertexA1;
+    var vertexA2;
+    var vertexB1;
+    var vertexB2;
 
+    for (var vA = 0; vA < membraneA.length; vA++) {
+        vertexA1 = membraneA[vA];
+        vertexA2 = vA < membraneA.length - 1 ? membraneA[vA + 1] : vertexA2 = membraneA[0];
 
-    for (var sa = 0; sa < ma.length; sa++) {
-        sa1 = ma[sa];
-        if (sa < ma.length-1)
-            sa2 = ma[sa + 1];
-        else
-            sa2 = ma[0];
+        for (var vB = 0; vB < membraneB.length; vB++) {
+            vertexB1 = membraneB[vB];
+            vertexB2 = vB < membraneB.length - 1 ? membraneB[vB + 1] : vertexB2 = membraneB[0];
 
-        for (var sb = 0; sb < mb.length; sb++) {
-            sb1 = mb[sb];
-            if (sb < mb.length-1)
-                sb2 = mb[sb + 1];
-            else
-                sb2 = mb[0];
-
-            var c = nsGene.crossing(sa1, sa2, sb1, sb2);
-
-            if (c) {
-                var x = ((sa2.x - sa1.x) * (sb2.x * sb1.y - sb2.y * sb1.x) - (sb2.x - sb1.x) * (sa2.x * sa1.y - sa2.y * sa1.x)) / ((sa2.y - sa1.y) * (sb2.x - sb1.x) - (sb2.y - sb1.y) * (sa2.x - sa1.x));
-                var y = ((sb2.y - sb1.y) * (sa2.x * sa1.y - sa2.y * sa1.x) - (sa2.y - sa1.y) * (sb2.x * sb1.y - sb2.y * sb1.x)) / ((sb2.y - sb1.y) * (sa2.x - sa1.x) - (sa2.y - sa1.y) * (sb2.x - sb1.x));
-
-                entityA.crossing.push({x: x, y: y});
+            if (nsGene.crossing(vertexA1, vertexA2, vertexB1, vertexB2)) {
+                entityA.crossing.push({
+                    x: ((vertexA2.x - vertexA1.x) * (vertexB2.x * vertexB1.y - vertexB2.y * vertexB1.x) - (vertexB2.x - vertexB1.x) * (vertexA2.x * vertexA1.y - vertexA2.y * vertexA1.x)) / ((vertexA2.y - vertexA1.y) * (vertexB2.x - vertexB1.x) - (vertexB2.y - vertexB1.y) * (vertexA2.x - vertexA1.x)),
+                    y: ((vertexB2.y - vertexB1.y) * (vertexA2.x * vertexA1.y - vertexA2.y * vertexA1.x) - (vertexA2.y - vertexA1.y) * (vertexB2.x * vertexB1.y - vertexB2.y * vertexB1.x)) / ((vertexB2.y - vertexB1.y) * (vertexA2.x - vertexA1.x) - (vertexA2.y - vertexA1.y) * (vertexB2.x - vertexB1.x))
+                });
             }
         }
     }

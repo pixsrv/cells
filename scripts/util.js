@@ -104,21 +104,6 @@ nsGene.toRadians = function (angleDeg) {
     return angleDeg * (Math.PI / 180);
 };
 
-nsGene.calcIntersection = function (r1, r2, dist) {
-    var d1 = (-r1 * r1 + dist * dist + r2 * r2) / (2 * dist);
-    var d2 = dist - d1;
-    var a = Math.sqrt(r1 * r1 - d1 * d1);
-    var alpha1 = Math.asin(a / r1);
-    var alpha2 = Math.asin(a / r2);
-
-    return {
-        d1    : d1,
-        d2    : d2,
-        a     : a,
-        alpha1: alpha1,
-        alpha2: alpha2
-    }
-};
 
 /**
  *
@@ -184,10 +169,8 @@ nsGene.det = function (a, b, c) {
         [c.x, c.y, 1]
     ];
 
-    var d = m[0][0] * m[1][1] * m[2][2] + m[0][1] * m[1][2] * m[2][0] + m[0][2] * m[1][0] * m[2][1]
+    return m[0][0] * m[1][1] * m[2][2] + m[0][1] * m[1][2] * m[2][0] + m[0][2] * m[1][0] * m[2][1]
         - ( m[0][2] * m[1][1] * m[2][0] + m[0][0] * m[1][2] * m[2][1] + m[0][1] * m[1][0] * m[2][2] );
-
-    return d;
 };
 
 nsGene.belongs = function (a, b, c) {

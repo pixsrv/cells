@@ -18,26 +18,27 @@ nsGene.Renderer = function Renderer() {
         var xm = e.clientX;
         var ym = e.clientY;
 
-        /*
-         var entity = {
-         cell    : new nsGene.Cell(),
-         x       : xm,
-         y       : ym,
-         angle   : 0,
-         velocity: 0,
-         mass    : 1
-         };
-         entity.cell.createMembrane();
-         entity.cell.convertMembrane2Cartesian(entity);
-         nsGene.world.entities.push(entity);
-         */
+/*
+        var entity = {
+            cell    : new nsGene.Cell(),
+            x       : xm,
+            y       : ym,
+            angle   : 0,
+            velocity: 0,
+            mass    : 1
+        };
+        entity.crossing = [];
+        entity.cell.createMembrane();
+        entity.cell.convertMembrane2Cartesian(entity);
+        nsGene.world.entities.push(entity);
+*/
 
         //temp: test adding points to membrane
-        var entity = nsGene.world.entities[0];
-        var p = entity.cell.genes.membranePolar.value[0];
+         var entity = nsGene.world.entities[0];
+         var p = entity.cell.genes.membranePolar.value[0];
 
-        // first point splits into two
-        entity.cell.genes.membranePolar.value.splice(entity.cell.genes.membranePolar.value.length - 1, 0, p);
+         // first point splits into two
+         entity.cell.genes.membranePolar.value.splice(entity.cell.genes.membranePolar.value.length - 1, 0, p);
 
         nsGene.renderer.render(1);
     });
@@ -49,8 +50,6 @@ nsGene.Renderer = function Renderer() {
         entity.y = e.clientY;
     });
 };
-
-
 
 
 //nsGene.Renderer.prototype.ctx.addEventListener("mouseout", function (e) {
@@ -127,7 +126,7 @@ nsGene.Renderer.prototype.drawEntity = function (entity) {
     ctx.stroke();
 
     // draw crossing line
-    if (entity.crossing.length>1) {
+    if (entity.crossing.length > 1) {
         ctx.beginPath();
         ctx.moveTo(entity.crossing[0].x, entity.crossing[0].y);
         ctx.lineTo(entity.crossing[1].x, entity.crossing[1].y);
