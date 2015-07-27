@@ -18,32 +18,39 @@ nsGene.Renderer = function Renderer() {
         var xm = e.clientX;
         var ym = e.clientY;
 
-        var entity = {
-            cell    : new nsGene.Cell(),
-            x       : xm,
-            y       : ym,
-            angle   : 0,
-            velocity: 0,
-            mass    : 1
-        };
-        entity.cell.createMembrane();
-        nsGene.world.entities.push(entity);
+        /*
+         var entity = {
+         cell    : new nsGene.Cell(),
+         x       : xm,
+         y       : ym,
+         angle   : 0,
+         velocity: 0,
+         mass    : 1
+         };
+         entity.cell.createMembrane();
+         entity.cell.convertMembrane2Cartesian(entity);
+         nsGene.world.entities.push(entity);
+         */
+
+        //temp: test adding points to membrane
+        var entity = nsGene.world.entities[0];
+        var p = entity.cell.genes.membranePolar.value[0];
+
+        // first point splits into two
+        entity.cell.genes.membranePolar.value.splice(entity.cell.genes.membranePolar.value.length - 1, 0, p);
 
         nsGene.renderer.render(1);
     });
 
+    nsGene.Renderer.prototype.canvas.addEventListener('mousemove', function (e) {
+        var entity = nsGene.world.entities[0];
 
+        entity.x = e.clientX;
+        entity.y = e.clientY;
+    });
 };
 
 
-//nsGene.Renderer.prototype.ctx.addEventListener('mousemove', function (e) {
-//    if (!running) {
-//        clear();
-//        ball.x = e.clientX;
-//        ball.y = e.clientY;
-//        ball.draw();
-//    }
-//});
 
 
 //nsGene.Renderer.prototype.ctx.addEventListener("mouseout", function (e) {
@@ -85,25 +92,25 @@ nsGene.Renderer.prototype.drawEntity = function (entity) {
     var cfg = nsGene.config;
 
     var genes = entity.cell.genes;
-    var bodyColor = nsGene.colorGene2hex2(genes.bodycolor);
-    var membraneColor = nsGene.rgb2hex(genes.membranecolor.value[0], genes.membranecolor.value[1], genes.membranecolor.value[2]);
+    var bodyColor = nsGene.colorGene2hex2(genes.bodyColor);
+    var membraneColor = nsGene.rgb2hex(genes.membraneColor.value[0], genes.membraneColor.value[1], genes.membraneColor.value[2]);
 
     var x = entity.x;
     var y = entity.y;
-    var r = genes.bodysize.value;
-    var startPoint = nsGene.transformRotate(x, y, r, 0, entity.angle);
-    var startAngle = 90 + (360 / genes.membranedef.value / 2);
 
-    var membrane = genes.membranepolar.value;
+    var membraneXY = genes.membraneXY.value;
 
     // draw membrane
     ctx.beginPath();
     ctx.fillStyle = membraneColor;
-    ctx.moveTo(startPoint.x, startPoint.y);
 
-    for (var s = 0; s < membrane.length - 1; s++) {
-        startPoint = nsGene.transformRotate(startPoint.x, startPoint.y, membrane[s].length, 0, startAngle + (s != 0 ? (s * membrane[s].angleDeg) : 0));
-        ctx.lineTo(startPoint.x, startPoint.y);
+    for (var s = 0; s < membraneXY.length; s++) {
+        var point = membraneXY[s];
+        if (s == 0) {
+            ctx.moveTo(point.x, point.y);
+            continue;
+        }
+        ctx.lineTo(point.x, point.y);
     }
 
     ctx.closePath();
@@ -119,18 +126,13 @@ nsGene.Renderer.prototype.drawEntity = function (entity) {
     ctx.strokeStyle = membraneColor;
     ctx.stroke();
 
-    if (cfg.drawTensors) {
+    // draw crossing line
+    if (entity.crossing.length>1) {
         ctx.beginPath();
-        ctx.lineWidth = .08;
-        ctx.strokeStyle = "blue";
-
-        for (i = 0; i < membrane.length; i++) {
-            point = membrane[i];
-            newPoint = nsGene.transformRotate(entity.x, entity.y, r * point[0], 0, point[1]);
-
-            ctx.moveTo(entity.x, entity.y);
-            ctx.lineTo(newPoint.x, newPoint.y);
-        }
+        ctx.moveTo(entity.crossing[0].x, entity.crossing[0].y);
+        ctx.lineTo(entity.crossing[1].x, entity.crossing[1].y);
+        ctx.lineWidth = genes.membraneThickness.value;
+        ctx.strokeStyle = membraneColor;
         ctx.stroke();
     }
 

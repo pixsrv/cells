@@ -12,7 +12,7 @@ nsGene.init = (function () {
 
     nsGene.renderer = new nsGene.Renderer();
 
-    nsGene.world.run(1);
+    nsGene.world.run();
 })();
 
 

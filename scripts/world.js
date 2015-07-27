@@ -19,16 +19,16 @@ nsGene.World.prototype.populate = function () {
         // verify position
 
         // horizontal
-        if (entity.x < entity.cell.genes.bodysize.value + 2)
-            entity.x = entity.cell.genes.bodysize.value + 2;
-        else if (entity.x > nsGene.config.canvasSizeX - entity.cell.genes.bodysize.value - 2)
-            entity.x = nsGene.config.canvasSizeX - entity.cell.genes.bodysize.value - 2;
+        if (entity.x < entity.cell.genes.bodySize.value + 2)
+            entity.x = entity.cell.genes.bodySize.value + 2;
+        else if (entity.x > nsGene.config.canvasSizeX - entity.cell.genes.bodySize.value - 2)
+            entity.x = nsGene.config.canvasSizeX - entity.cell.genes.bodySize.value - 2;
 
         // vertical
-        if (entity.y < entity.cell.genes.bodysize.value + 2)
-            entity.y = entity.cell.genes.bodysize.value + 2;
-        else if (entity.y > nsGene.config.canvasSizeX - entity.cell.genes.bodysize.value - 2)
-            entity.y = nsGene.config.canvasSizeX - entity.cell.genes.bodysize.value - 2;
+        if (entity.y < entity.cell.genes.bodySize.value + 2)
+            entity.y = entity.cell.genes.bodySize.value + 2;
+        else if (entity.y > nsGene.config.canvasSizeX - entity.cell.genes.bodySize.value - 2)
+            entity.y = nsGene.config.canvasSizeX - entity.cell.genes.bodySize.value - 2;
 
         this.entities.push(entity);
     }
@@ -47,24 +47,30 @@ nsGene.World.prototype.schemaPopulate = function (count) {
             velocity: 0,
             mass    : 1
         };
-        entity.cell.createMembrane();
+        entity.crossing = [];
+        entity.cell.genes.bodySize.value = 40;
+        entity.cell.createMembrane(true);
         this.entities.push(entity);
     }
+
     if (count > 1) {
         entity = {
             cell     : new nsGene.Cell(),
-            x        : 330,
-            y        : 170,
+            //x        : 330,
+            //y        : 170,
+            x        : 290,
+            y        : 220,
             angle    : 0,
             direction: 0,
             velocity : 0,
             mass     : 1
         };
-        entity.cell.createMembrane();
+        entity.crossing = [];
+        entity.cell.createMembrane(true);
         this.entities.push(entity);
     }
-    if (count > 2) {
 
+    if (count > 2) {
         entity = {
             cell     : new nsGene.Cell(),
             x        : 170,
@@ -74,20 +80,22 @@ nsGene.World.prototype.schemaPopulate = function (count) {
             velocity : 0,
             mass     : 1
         };
+        entity.crossing = [];
         entity.cell.createMembrane();
         this.entities.push(entity);
     }
-    if (count > 3) {
 
+    if (count > 3) {
         entity = {
             cell     : new nsGene.Cell(),
             x        : 330,
-            y        : 330,
+            y        : 300,
             angle    : 0,
             direction: 0,
             velocity : 0,
             mass     : 1
         };
+        entity.crossing = [];
         entity.cell.createMembrane();
         this.entities.push(entity);
     }
@@ -116,8 +124,7 @@ nsGene.World.prototype.pump = function (entity, percent) {
 
     var genes = entity.cell.genes;
 
-    genes.bodysize.value += (genes.bodysize.value * percent / 100);
-
+    genes.bodySize.value += (genes.bodySize.value * percent / 100);
 };
 
 
@@ -130,7 +137,51 @@ nsGene.World.prototype.run = function () {
     for (var e = 0; e < entities.length; e++) {
         var entity = entities[e];
         entity.cell.process(entity);
+        entity.crossing = [];
+
+        for (var f = 0; f < entities.length; f++) {
+            if (f == e) continue;
+            var entity2 = entities[f];
+            nsGene.World.prototype.calcIntersection2(entity, entity2);
+        }
     }
 
     nsGene.renderer.render(arguments[0]);
+};
+
+
+nsGene.World.prototype.calcIntersection2 = function (entityA, entityB) {
+    var ma = entityA.cell.genes.membraneXY.value;
+    var mb = entityB.cell.genes.membraneXY.value;
+
+    var sa1;
+    var sa2;
+    var sb1;
+    var sb2;
+
+
+    for (var sa = 0; sa < ma.length; sa++) {
+        sa1 = ma[sa];
+        if (sa < ma.length-1)
+            sa2 = ma[sa + 1];
+        else
+            sa2 = ma[0];
+
+        for (var sb = 0; sb < mb.length; sb++) {
+            sb1 = mb[sb];
+            if (sb < mb.length-1)
+                sb2 = mb[sb + 1];
+            else
+                sb2 = mb[0];
+
+            var c = nsGene.crossing(sa1, sa2, sb1, sb2);
+
+            if (c) {
+                var x = ((sa2.x - sa1.x) * (sb2.x * sb1.y - sb2.y * sb1.x) - (sb2.x - sb1.x) * (sa2.x * sa1.y - sa2.y * sa1.x)) / ((sa2.y - sa1.y) * (sb2.x - sb1.x) - (sb2.y - sb1.y) * (sa2.x - sa1.x));
+                var y = ((sb2.y - sb1.y) * (sa2.x * sa1.y - sa2.y * sa1.x) - (sa2.y - sa1.y) * (sb2.x * sb1.y - sb2.y * sb1.x)) / ((sb2.y - sb1.y) * (sa2.x - sa1.x) - (sa2.y - sa1.y) * (sb2.x - sb1.x));
+
+                entityA.crossing.push({x: x, y: y});
+            }
+        }
+    }
 };

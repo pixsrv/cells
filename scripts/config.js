@@ -5,7 +5,7 @@
 window.nsGene = window.nsGene || {};
 
 nsGene.config = {
-    isRunning: false,
+    isRunning: true,
 
     seed: 789,
 
