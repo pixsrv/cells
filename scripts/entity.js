@@ -25,7 +25,7 @@ nsGene.Cell = function Cell() {
             //"value"        : 15 + nsGene.randomRange(-8, 12),
             //"value"        : 110,
             //"value"        : 100,
-            "value"        : 80 + nsGene.randomRange(-55, 30),
+            "value"        : 60 + nsGene.randomRange(-50, 20),
             "min"          : 3,
             "max"          : undefined
         }),
@@ -41,7 +41,7 @@ nsGene.Cell = function Cell() {
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 7,
+            "value"        : 24,
             "min"          : 3,
             "max"          : 48
         }),

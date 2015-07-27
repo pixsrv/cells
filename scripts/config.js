@@ -17,7 +17,7 @@ nsGene.config = {
     //entityInitialCount: 2,
     //entityInitialCount: 4,
     //entityInitialCount: 5,
-    entityInitialCount: 15,
+    entityInitialCount: 35,
 
     entityMinCount: 0,
     entityMaxCount: 2500,

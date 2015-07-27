@@ -115,7 +115,7 @@ nsGene.World.prototype.createEntity = function () {
         mass    : 1,
         crossing: []
     };
-    entity.cell.createMembranePolar();
+    entity.cell.createMembranePolar(true);
 
     return entity;
 };
@@ -149,7 +149,7 @@ nsGene.World.prototype.run = function () {
             if (eB == eA) continue;
 
             entityB = entities[eB];
-            entityB.cell.process(entityB);
+            //entityB.cell.process(entityB);
 
             nsGene.World.prototype.intersect(entityA, entityB);
         }
@@ -189,8 +189,6 @@ nsGene.World.prototype.intersect = function (entityA, entityB) {
                     y: ((vertexB2.y - vertexB1.y) * (vertexA2.x * vertexA1.y - vertexA2.y * vertexA1.x) - (vertexA2.y - vertexA1.y) * (vertexB2.x * vertexB1.y - vertexB2.y * vertexB1.x)) / ((vertexB2.y - vertexB1.y) * (vertexA2.x - vertexA1.x) - (vertexA2.y - vertexA1.y) * (vertexB2.x - vertexB1.x))
                 };
                 newMembraneA.push(cp);
-
-                //entityA.crossing.push(cp);
             }
         }
     }
