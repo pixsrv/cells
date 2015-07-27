@@ -42,7 +42,7 @@ nsGene.Cell = function Cell() {
             "isInheritable": true,
             "isEvolvable"  : true,
             "isMutable"    : true,
-            "value"        : 12,
+            "value"        : 24,
             "min"          : 3,
             "max"          : 48
         }),
