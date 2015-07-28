@@ -27,7 +27,6 @@ nsGene.Renderer = function Renderer() {
             velocity: 0,
             mass    : 1
         };
-        entity.crossing = [];
         entity.cell.createMembranePolar();
         entity.cell.membranePolar2Cartesian(entity);
         nsGene.world.entities.push(entity);
@@ -124,16 +123,6 @@ nsGene.Renderer.prototype.drawEntity = function (entity) {
     ctx.lineWidth = genes.membraneThickness.value;
     ctx.strokeStyle = membraneColor;
     ctx.stroke();
-
-    // draw crossing line
-    if (entity.crossing.length > 1) {
-        ctx.beginPath();
-        ctx.moveTo(entity.crossing[0].x, entity.crossing[0].y);
-        ctx.lineTo(entity.crossing[1].x, entity.crossing[1].y);
-        ctx.lineWidth = genes.membraneThickness.value;
-        ctx.strokeStyle = membraneColor;
-        ctx.stroke();
-    }
 
     if (cfg.drawForces) {
         newPoint = nsGene.transformRotate(x, y, entity.velocity * 20, 0, entity.direction);

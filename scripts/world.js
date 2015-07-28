@@ -50,7 +50,6 @@ nsGene.World.prototype.schemaPopulate = function (count) {
             velocity: 0,
             mass    : 1
         };
-        entity.crossing = [];
         entity.cell.genes.bodySize.value = 40;
         entity.cell.createMembranePolar(true);
         this.entities.push(entity);
@@ -68,7 +67,6 @@ nsGene.World.prototype.schemaPopulate = function (count) {
             velocity : 0,
             mass     : 1
         };
-        entity.crossing = [];
         entity.cell.createMembranePolar(true);
         this.entities.push(entity);
     }
@@ -83,7 +81,6 @@ nsGene.World.prototype.schemaPopulate = function (count) {
             velocity : 0,
             mass     : 1
         };
-        entity.crossing = [];
         entity.cell.createMembranePolar();
         this.entities.push(entity);
     }
@@ -98,7 +95,6 @@ nsGene.World.prototype.schemaPopulate = function (count) {
             velocity : 0,
             mass     : 1
         };
-        entity.crossing = [];
         entity.cell.createMembranePolar();
         this.entities.push(entity);
     }
@@ -112,8 +108,7 @@ nsGene.World.prototype.createEntity = function () {
         y       : Math.floor((nsGene.random() * nsGene.config.canvasSizeY)),
         angle   : Math.floor((nsGene.random() * 360)),
         velocity: 0, //Math.floor((nsGene.random() * 5)),
-        mass    : 1,
-        crossing: []
+        mass    : 1
     };
     entity.cell.createMembranePolar(true);
 
@@ -143,8 +138,6 @@ nsGene.World.prototype.run = function () {
         entityA = entities[eA];
         entityA.cell.process(entityA);
 
-        entityA.crossing = [];
-
         for (var eB = 0; eB < entities.length; eB++) {
             if (eB == eA) continue;
 
@@ -172,25 +165,30 @@ nsGene.World.prototype.intersect = function (entityA, entityB) {
 
     var newMembraneA = [];
 
+    var undercover;
+
     for (var vA = 0; vA < membraneA.length; vA++) {
         vertexA1 = membraneA[vA];
-        vertexA2 = vA < membraneA.length - 1 ? membraneA[vA + 1] : vertexA2 = membraneA[0];
+        vertexA2 = vA < membraneA.length - 1 ? membraneA[vA + 1] : membraneA[0];
 
-        if (!nsGene.calcPointInPolygon(vertexA1.x, vertexA1.y, membraneB))
+        undercover = nsGene.calcPointInPolygon(vertexA1.x, vertexA1.y, membraneB);
+        if (!undercover)
             newMembraneA.push(vertexA1);
 
         for (var vB = 0; vB < membraneB.length; vB++) {
             vertexB1 = membraneB[vB];
-            vertexB2 = vB < membraneB.length - 1 ? membraneB[vB + 1] : vertexB2 = membraneB[0];
+            vertexB2 = vB < membraneB.length - 1 ? membraneB[vB + 1] : membraneB[0];
 
-            if (nsGene.crossing(vertexA1, vertexA2, vertexB1, vertexB2)) {
+            if (nsGene.isCrossing(vertexA1, vertexA2, vertexB1, vertexB2)) {
                 cp = {
                     x: ((vertexA2.x - vertexA1.x) * (vertexB2.x * vertexB1.y - vertexB2.y * vertexB1.x) - (vertexB2.x - vertexB1.x) * (vertexA2.x * vertexA1.y - vertexA2.y * vertexA1.x)) / ((vertexA2.y - vertexA1.y) * (vertexB2.x - vertexB1.x) - (vertexB2.y - vertexB1.y) * (vertexA2.x - vertexA1.x)),
                     y: ((vertexB2.y - vertexB1.y) * (vertexA2.x * vertexA1.y - vertexA2.y * vertexA1.x) - (vertexA2.y - vertexA1.y) * (vertexB2.x * vertexB1.y - vertexB2.y * vertexB1.x)) / ((vertexB2.y - vertexB1.y) * (vertexA2.x - vertexA1.x) - (vertexA2.y - vertexA1.y) * (vertexB2.x - vertexB1.x))
                 };
                 newMembraneA.push(cp);
+                break;
             }
         }
     }
+
     entityA.cell.genes.membraneXY.value = newMembraneA;
 };

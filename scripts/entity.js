@@ -128,35 +128,6 @@ nsGene.Cell.prototype.process = function (entity) {
         segment.length = l + lengthDiff;
     }
 
-    nsGene.Cell.prototype.membranePolar2Cartesian(entity);
+    nsGene.membranePolar2Cartesian(entity);
 };
 
-
-nsGene.Cell.prototype.membranePolar2Cartesian = function (entity) {
-    // TODO: move to utils
-    var genes = entity.cell.genes;
-
-    var x = entity.x;
-    var y = entity.y;
-    var r = genes.bodySize.value;
-    var startPoint = nsGene.transformRotate(x, y, r, 0, entity.angle);
-    var startAngle = 90 + (360 / genes.membraneRoughness.value / 2);
-
-    var membrane = genes.membranePolar.value;
-
-    genes.membraneXY.value = [];
-    var membraneXY = genes.membraneXY.value;
-
-    membraneXY.push({
-        x: startPoint.x,
-        y: startPoint.y
-    });
-
-    for (var s = 0; s < membrane.length - 1; s++) {
-        startPoint = nsGene.transformRotate(startPoint.x, startPoint.y, membrane[s].length, 0, startAngle + (s != 0 ? (s * membrane[s].angleDeg) : 0));
-        membraneXY.push({
-            x: startPoint.x,
-            y: startPoint.y
-        });
-    }
-};

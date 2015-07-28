@@ -152,6 +152,36 @@ nsGene.convertPolar2Cartesian = function (x, y, r, polar) {
     return cartesian;
 };
 
+nsGene.membranePolar2Cartesian = function (entity) {
+    // TODO: move to utils
+    var genes = entity.cell.genes;
+
+    var x = entity.x;
+    var y = entity.y;
+    var r = genes.bodySize.value;
+    var startPoint = nsGene.transformRotate(x, y, r, 0, entity.angle);
+    var startAngle = 90 + (360 / genes.membraneRoughness.value / 2);
+
+    var membrane = genes.membranePolar.value;
+
+    genes.membraneXY.value = [];
+    var membraneXY = genes.membraneXY.value;
+
+    membraneXY.push({
+        x: startPoint.x,
+        y: startPoint.y
+    });
+
+    for (var s = 0; s < membrane.length - 1; s++) {
+        startPoint = nsGene.transformRotate(startPoint.x, startPoint.y, membrane[s].length, 0, startAngle + (s != 0 ? (s * membrane[s].angleDeg) : 0));
+        membraneXY.push({
+            x: startPoint.x,
+            y: startPoint.y
+        });
+    }
+};
+
+
 nsGene.getQadrant = function (x1, y1, x2, y2) {
     if (x1 <= x2) {
         if (y1 <= y2) return 1;
@@ -180,7 +210,7 @@ nsGene.belongs = function (a, b, c) {
     && Math.min(a.y, b.y) <= c.y && Math.max(a.y, b.y) >= c.y);
 };
 
-nsGene.crossing = function (a, b, c, d) {
+nsGene.isCrossing = function (a, b, c, d) {
     var d1 = nsGene.det(c, d, a);
     var d2 = nsGene.det(c, d, b);
     var d3 = nsGene.det(a, b, c);
